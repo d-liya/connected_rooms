@@ -1,4 +1,6 @@
-import type { CSSProperties } from "react";
+import { decodeGameImage } from "../assets";
+import { useAnimationFrame } from "./hooks";
+import { useEffect, useState, useRef, type CSSProperties } from "react";
 import type { Direction } from "./input";
 
 export interface SpriteSheetDefinition {
@@ -21,6 +23,11 @@ interface ActorSpriteProps {
   className?: string;
   hidden?: boolean;
   label: string;
+  elapsedSeconds?: number;
+  durationSeconds?: number;
+  loop?: boolean;
+  paused?: boolean;
+  playbackKey?: string | number;
 }
 
 export function ActorSprite({
@@ -31,8 +38,27 @@ export function ActorSprite({
   facing,
   className = "",
   hidden = false,
-  label,
+  label, elapsedSeconds, durationSeconds, loop = true, paused = false, playbackKey,
 }: ActorSpriteProps) {
+  const [readySheet, setReadySheet] = useState<SpriteSheetDefinition | null>(null);
+  const [clock, setClock] = useState(0);
+  const clockRef = useRef(0);
+  useEffect(() => {
+    let cancelled = false;
+    void decodeGameImage(sheet.src).then(() => { if (!cancelled) setReadySheet(sheet); }).catch(() => undefined);
+    return () => { cancelled = true; };
+  }, [sheet]);
+  useEffect(() => { clockRef.current = 0; setClock(0); }, [sheet.src, playbackKey]);
+  useAnimationFrame(elapsedSeconds === undefined && !paused && readySheet?.src === sheet.src, dt => {
+    clockRef.current += dt; setClock(clockRef.current);
+  });
+  if (!readySheet) return null;
+  const active = readySheet;
+  const seconds = Math.max(0, elapsedSeconds ?? clock);
+  const duration = durationSeconds ?? active.frames / active.fps;
+  const progress = seconds / Math.max(duration, 0.001);
+  const frame = loop ? Math.floor(progress * active.frames) % active.frames : Math.min(active.frames - 1, Math.floor(progress * active.frames));
+  sheet = active;
   const frameWorldWidth =
     (sheet.height * (sheet.frameWidth / sheet.frameHeight)) / aspectRatio;
   const left = x - frameWorldWidth * sheet.anchorX;
@@ -43,6 +69,8 @@ export function ActorSprite({
     width: `${frameWorldWidth / 10}%`,
     height: `${sheet.height / 10}%`,
     backgroundImage: `url(${sheet.src})`,
+    animation: "none",
+    backgroundPosition: `${sheet.frames > 1 ? frame / (sheet.frames - 1) * 100 : 0}% 0`,
     backgroundSize: `${sheet.frames * 100}% 100%`,
     "--sprite-duration": `${sheet.frames / sheet.fps}s`,
     "--sprite-steps": Math.max(1, sheet.frames - 1),

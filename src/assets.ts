@@ -35,61 +35,35 @@ export interface AssetLoadProgress {
   total: number;
 }
 
-// Resolve once every image has loaded or failed (either counts as settled),
-// so a loading gate always completes. Audio is decoded through
-// AudioController.preload instead, which reports its own counted progress.
-export function waitForGameImages(
-  game: GameDefinition,
-  onProgress?: (progress: AssetLoadProgress) => void,
-  timeoutMs = 15000,
-): Promise<void> {
-  const urls = [...new Set(collectImageUrls(game))];
-  const total = urls.length;
-  if (typeof window === "undefined" || total === 0) {
-    onProgress?.({ loaded: total, total });
-    return Promise.resolve();
-  }
-  onProgress?.({ loaded: 0, total });
-  return new Promise((resolve) => {
-    let loaded = 0;
-    let done = false;
-    const finish = () => {
-      if (done) return;
-      done = true;
-      window.clearTimeout(timer);
-      resolve();
-    };
-    const settle = () => {
-      loaded += 1;
-      onProgress?.({ loaded, total });
-      if (loaded >= total) finish();
-    };
-    const timer = window.setTimeout(() => {
-      onProgress?.({ loaded: total, total });
-      finish();
-    }, timeoutMs);
-    for (const src of urls) {
-      const image = new Image();
-      image.decoding = "async";
-      image.onload = settle;
-      image.onerror = settle;
-      image.src = src;
-    }
+const decoded = new Map<string, Promise<HTMLImageElement>>();
+export function decodeGameImage(src: string): Promise<HTMLImageElement> {
+  const cached = decoded.get(src);
+  if (cached) return cached;
+  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => image.decode().then(() => resolve(image), reject);
+    image.onerror = () => reject(new Error(`Unable to load image: ${src}`));
+    image.src = src;
   });
+  decoded.set(src, promise);
+  void promise.catch(() => decoded.delete(src));
+  return promise;
 }
 
-// Warm the browser image cache in the background right after first paint, so
-// no CORS configuration is needed on the CDN. Safe to call once on startup;
-// failures are ignored because waitForGameImages settles either way and every
-// asset also loads on demand when first used.
+export async function waitForGameImages(game: GameDefinition, onProgress?: (progress: AssetLoadProgress) => void): Promise<void> {
+  const urls = [...new Set(collectImageUrls(game))];
+  let loaded = 0;
+  onProgress?.({ loaded, total: urls.length });
+  // Limit concurrent decoding; failure never counts as ready.
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(4, urls.length) }, async () => {
+    while (next < urls.length) {
+      await decodeGameImage(urls[next++]!);
+      onProgress?.({ loaded: ++loaded, total: urls.length });
+    }
+  }));
+}
 export function preloadGameAssets(game: GameDefinition): void {
-  const run = () => {
-    void waitForGameImages(game);
-  };
-  if (typeof window === "undefined") return;
-  const idle = (window as Window & {
-    requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => void;
-  }).requestIdleCallback;
-  if (idle) idle.bind(window)(run, { timeout: 2500 });
-  else window.setTimeout(run, 800);
+  if (typeof window !== "undefined") void waitForGameImages(game).catch(() => undefined);
 }

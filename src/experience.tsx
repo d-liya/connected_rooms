@@ -20,6 +20,7 @@ export function GameExperience() {
   const [moving, setMoving] = useState(false);
   const [muted, setMuted] = useState(false);
   const [load, setLoad] = useState({ ready: false, fraction: 0 });
+  const [loadError, setLoadError] = useState<string | null>(null);
   const target = useRef<number | null>(null);
   const audio = useRef<ReturnType<typeof createGameAudio> | null>(null);
   if (!audio.current) audio.current = createGameAudio();
@@ -48,7 +49,7 @@ export function GameExperience() {
       setLoad({ fraction, ready: fraction >= 1 });
     };
     audio.current?.preload((loaded, total) => { audioLoaded = loaded; audioTotal = total; report(); });
-    void waitForGameImages(ACTIVE_GAME, ({ loaded, total }) => { imagesLoaded = loaded; imagesTotal = total; report(); });
+    void waitForGameImages(ACTIVE_GAME, ({ loaded, total }) => { imagesLoaded = loaded; imagesTotal = total; report(); }).catch(error => { if (!cancelled) setLoadError(String(error)); });
     const unlock = () => audio.current?.unlock();
     const visibility = () => { if (document.visibilityState === "visible") unlock(); };
     window.addEventListener("pointerdown", unlock);
@@ -72,9 +73,10 @@ export function GameExperience() {
   const reset = () => { setRoomId(firstRoom.id); setX(firstRoom.spawnX); setFacing("right"); setStatus("playing"); };
   const sprites = ACTIVE_GAME.assets.characters[ACTIVE_GAME.player.assetId];
   const player = <ActorSprite aspectRatio={ACTIVE_GAME.presentation.aspectRatio}
-    sheet={moving ? sprites.walk ?? sprites.idle : sprites.idle} x={x} groundY={room.groundY} facing={facing} label="Player" />;
+    sheet={moving ? sprites.walk ?? sprites.idle : sprites.idle} x={x} groundY={room.groundY} facing={facing} label="Player" paused={status === "paused"} />;
   const rootStyle = { "--game-aspect": ACTIVE_GAME.presentation.aspectRatio,
     "--game-max-width": `${ACTIVE_GAME.presentation.maxStageWidth}px` } as CSSProperties;
+  if (loadError) return <main role="alert"><h1>Assets could not load</h1><p>{loadError}</p><button onClick={() => window.location.reload()}>Retry</button></main>;
   return <div className={`game-root ${ACTIVE_GAME.presentation.themeClass}`} style={rootStyle}>
     {status === "title" ? <TitleScreen ready={load.ready} progress={load.fraction}
       onStart={() => { if (load.ready) { audio.current?.start(); setStatus("intro"); } }} />

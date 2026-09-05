@@ -25,3 +25,6 @@ in docs/ARCHITECTURE.md; do not silently change units.
 Return only complete changed/new files in <file name="relative/path">contents</file> blocks.
 Do not reproduce unchanged files or binaries. npm run typecheck and npm run build must pass.
 The host validates paths and publishes dist. Server adapter wiring is a separate task.
+
+## Playback and presentation defaults
+Author game-specific title/menu in src/title-screen.tsx and HUD CSS. Preserve title ready/progress/onStart behavior. Keep src/screens.tsx cinematic sequencing intact. ActorSprite accepts elapsedSeconds, durationSeconds, loop, paused and playbackKey. Synchronize these with gameplay action clocks; do not remount actors or override sprite CSS animations. Update ambient patrols across all rooms using core/ambient.ts; keep combat and voices local. Pause all actors when paused. Catch image-load failures and show retry; never bypass decoding.
