@@ -1,0 +1,51 @@
+{
+  "aspectRatio": 1.6,
+  "image": "assets/map.svg",
+  "startRoom": "lower",
+  "rooms": [
+    {
+      "id": "lower",
+      "label": "Lower room",
+      "groundY": 900,
+      "bounds": {
+        "left": 80,
+        "right": 920
+      },
+      "spawn": {
+        "x": 180,
+        "y": 900
+      }
+    },
+    {
+      "id": "upper",
+      "label": "Upper room",
+      "groundY": 450,
+      "bounds": {
+        "left": 80,
+        "right": 920
+      },
+      "spawn": {
+        "x": 820,
+        "y": 450
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "up",
+      "from": "lower",
+      "to": "upper",
+      "x": 850,
+      "targetX": 850,
+      "label": "Go upstairs"
+    },
+    {
+      "id": "down",
+      "from": "upper",
+      "to": "lower",
+      "x": 850,
+      "targetX": 850,
+      "label": "Go downstairs"
+    }
+  ]
+}

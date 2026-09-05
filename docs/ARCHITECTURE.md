@@ -1,73 +1,55 @@
-# Architecture for agent-generated games
+# Template and generation contract
 
-The repository has three layers. This is enough structure to generate a first game quickly without
-turning the project into a general-purpose engine.
+## Boundaries
 
-Keep the file count low: one module per layer area, not one module per function. Do not add a file
-for a single consumer or split a module until it exceeds ~600 lines or gains a second consumer.
+`src/core/world.ts` defines rooms and explicit directed connections. A room may be a floor
+or a horizontal portion of one floor. Connections carry their destination spawn; they do
+not imply linear floor order or gameplay unlock rules. Gameplay owns locks and progression.
 
-## 1. Stable core
+`src/core/map.tsx` renders one authored map with full-map large-screen framing and cover/follow
+framing on portrait or narrow screens. All world inputs, including camera focus and pointer
+outputs, use 0..1000. `src/core/sprites.tsx` preserves source aspect ratios and foot anchors.
+`src/core/input.tsx`, hooks.ts, and audio.ts own browser lifecycle concerns.
 
-`src/core/` should survive when the current story and mechanic are removed. It must not import from
-`src/games/` or `src/mechanics/`. It owns camera/layout math, normalized input coordinates, frame
-timing, touch and keyboard input, sprite-sheet rendering, timed sequences, element measurement, and
-manifest-driven audio.
+`src/game.tsx` is intentionally replaceable. Title, intro copy, player state, interactions,
+and outcomes belong here. Build combat, stealth, puzzles, dialogue, or collection directly;
+there is no required stealth schema or universal gameplay DSL.
 
-| Module | Reusable responsibility |
-| --- | --- |
-| `map.tsx` | World/camera math plus landscape framing, portrait cover/follow camera, normalized pointer coordinates, overlay layer |
-| `sprites.tsx` | Metadata-driven sprite-sheet rendering and anchoring |
-| `input.tsx` | Held left/right state plus interact and pause keyboard bindings, pointer-safe mobile controls |
-| `hooks.ts` | Pausable frame loop with safe delta clamping, resize/orientation observation, lead-in/timed-beat/skip sequences |
-| `audio.ts` | Manifest-driven loops, sound effects, mute, voices, music ducking, voice-bank selection |
+## Prepared asset data (version 1)
 
-These APIs are intentionally small. They describe capabilities already used by the game rather than
-forecasting every possible game genre.
+world.json satisfies WorldDefinition; assets.json maps stable asset IDs to SpriteAsset;
+audio.json satisfies AudioManifest. The small checked-in fixtures are a runnable example.
+These are target contracts, not raw pipeline payloads. The server adapter is a later step.
 
-## 2. Replaceable story package
+Each SpriteClip supplies sources, frameWidth, frameHeight, frameCount, columns, fps, loop,
+height, anchor, facing, and mirror. One source means an atlas (columns supports multiple rows).
+Multiple sources mean equally sized individual frames, in playback order; their count must
+match frameCount. Static images use one frame. Missing animation states use fallback.
+Normalize unequal pose canvases before writing the manifest. Dimensions must be positive,
+counts and columns positive integers, fps positive, and anchors fractions in 0..1.
 
-`src/games/marlinspike.ts` is a single file containing assets, copy, camera shots, world
-coordinates, actors, encounter tuning, story-specific audio, and voice banks. Another stealth
-story should replace this file and change only the story export in `src/game.ts`.
+Preparation must convert pipeline seedUrl to fallback; clip.sheet/url to a one-source atlas;
+clip.frames/urls to individual sources; frameCount/fps/loop and direction metadata explicitly.
+For sheets, derive full-frame world height from canonical visible subject height and the
+source content-height calibration, including clip scale. For poses, apply normalization's
+scaleMultiplier to canonical renderSize.height and divide feetAnchor by 1000. Do not use
+padded sheet height as the pose baseline. Preserve authored image aspect ratios.
 
-The stealth schema lives in `src/mechanics/stealth/model.ts` because a combat game should not be
-forced to describe guards, suspicion, covers, or clues.
+Audio music and ambience are optional; sfx and voices.clips are maps keyed by stable IDs.
+Every audio clip has an explicit src and volume. Voice IDs need not share an extension or
+folder. Resolve local/CDN paths before creating AudioController. The empty manifest is valid.
 
-All asset URLs go through `asset()` in `src/assets.ts`, which prefixes `VITE_ASSET_BASE_URL` when
-set (CDN production) and falls back to paths relative to `index.html` (local dev and same-origin
-deploys). `preloadGameAssets()` warms the cache in the background after first paint.
+## One-call integration (not wired into the server yet)
 
-## 3. Replaceable mechanic package
+1. Clone a pinned template commit.
+2. Prepare local assets and the three JSON inputs; validate dimensions, IDs and connections.
+3. Include GAME_SPEC.md, AGENTS.md, all relevant source/config files, and each prepared JSON
+   once in the prompt. Attach visual references separately; exclude binary assets, dist,
+   node_modules, .git, and lockfile contents from model context.
+4. Request complete changed files using `<file name="relative/path">...</file>` delimiters.
+5. Reject absolute/traversal paths, duplicates, malformed/truncated blocks and protected files.
+   Apply only validated output to the seeded repository; keep untouched files.
+6. Run TypeScript/Vite build and publish dist. Record failures without an automatic model loop.
 
-`src/mechanics/stealth/` owns the current gameplay state, rules, stage, HUD, actor roles, and complete
-experience: `model.ts` (state types, story schema, world lookups, guard rules), `engine.ts` (frame
-state), `stage.tsx` (world rendering and actor sprites), `experience.tsx` (screens, HUD, shell
-wiring). A different primary loop gets a sibling directory and is selected by one import in
-`src/main.tsx`.
-
-The mechanic may compose any core modules it needs. It should not modify core to encode its own win
-condition, enemies, inventory, dialogue graph, or HUD.
-
-## Shared shell
-
-`src/screens.tsx` holds the title screen and cinematic briefing, both driven by the active
-definition. Keep it when the new brief uses the same launch/tour structure; replace it locally when
-it does not. It is not registered through a plugin system.
-
-`src/styles.css` is one stylesheet. A second shipped visual theme is the right time to
-split structural camera/sprite styles from theme styles; doing it before then would create files
-without proving a useful boundary.
-
-## The extraction test
-
-To judge a new abstraction, imagine deleting `src/games/marlinspike.ts` and
-`src/mechanics/stealth/`. If the code still has a clear use for any one-map browser game, it belongs
-in core. If it mentions clues, suspicion, guards, strongboxes, hearts, or victory copy, it belongs in
-the story or mechanic package.
-
-Add an abstraction only when one of these is true:
-
-1. Two real consumers already need it.
-2. It protects a fixed format invariant such as map coordinates, camera behavior, asset playback, or
-   touch input.
-3. It removes browser lifecycle complexity from mechanic code.
+No planning, critique, or testing-agent call is required. A testing agent can be added later.
+Pin the template commit and data-contract version in generation checkpoint fingerprints.

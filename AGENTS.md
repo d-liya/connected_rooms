@@ -1,63 +1,22 @@
-# Game generation contract
+# Connected rooms generation contract
 
-`GAME_SPEC.md` is the input brief for the game currently being built. It may be structured or plain
-prose. Read it before changing implementation code.
+Read GAME_SPEC.md first. This template uses React, TypeScript, and Vite.
 
-## Preserve the stable foundation
+- src/core/ contains reusable rendering, room geometry, input, timing, and audio. Keep story rules out of it.
+- src/game.tsx is the replaceable game: title, intro, state, interactions, HUD, progression, and outcomes.
+- src/generated/world.json, assets.json, and audio.json are prepared input data. Import them rather than transcribing them.
+- All world coordinates use 0..1000 on both axes. Sprite anchors use fractions 0..1.
+- Use asset() for image paths. Audio manifest src values must already be deployment-ready URLs (relative ./assets/... or absolute CDN URLs).
+- Preserve sprite aspect ratios and calibrated frame heights. Never substitute collision dimensions for artwork dimensions.
+- Keep keyboard, pointer, touch, pause, and restart usable. Use dt for gameplay timing.
+- Do not introduce an ECS, rule DSL, plugin registry, or universal gameplay state. Implement the requested mechanic directly.
+- Keep file count small. Split only for a clear responsibility or substantial size.
+- A generated game must have reachable success and recoverable failure where the brief requires them.
+- npm run typecheck and npm run build must pass. Deploy dist/, never the TypeScript source tree.
 
-Do not edit `src/core/` for story changes or mechanic-specific behavior. The core contract is:
+For one-call generation, return only complete new or changed UTF-8 files:
+<file name="src/game.tsx">complete contents</file>
+Do not return unchanged files, binary assets, dependencies, lockfile churn, Markdown fences, or a plan.
+Treat these as file delimiters, not XML-escaped source. The host must validate paths and completeness before applying them.
 
-- one normalized 1000 × 1000 world coordinate system rendered from one map image;
-- an authored aspect ratio with full-map landscape framing and cover/follow portrait framing;
-- sprite sheets described by metadata rather than hard-coded in the renderer;
-- keyboard, pointer, and touch input;
-- requestAnimationFrame timing with clamped deltas;
-- manifest-driven audio (local files or CDN) with voice ducking;
-- timed cinematic beats and a skippable handoff into gameplay.
-
-Change core only when the new brief explicitly changes one of those invariants.
-
-## Choose the smallest implementation path
-
-1. If the brief is another stealth game, create a story package under `src/games/` that satisfies
-   the `GameDefinition` in `src/mechanics/stealth/model.ts`. Reuse the stealth runtime unchanged
-   whenever possible.
-2. If the brief has a different primary loop, create `src/mechanics/<mode>/` with its own state,
-   rules, stage, HUD, and experience component. Reuse `src/core/` directly; do not add combat or
-   dialogue-adventure fields to stealth types.
-3. Select the story in `src/game.ts` and the runtime in `src/main.tsx` (one import line each).
-4. Keep story copy, coordinates, tuning, voice banks, and asset manifests out of core.
-
-Do not introduce an entity-component system, plugin registry, generic rule DSL, global event bus, or
-unified state type for hypothetical future mechanics. Extract a new shared abstraction only after a
-second real implementation needs the same behavior.
-
-## Keep the file count low
-
-Agent cost scales with files read. Prefer fewer, larger files over many small ones:
-
-- Do not create a new file for code with a single consumer or under ~100 lines; fold it into its
-  consumer.
-- Do not create a folder for a single file.
-- Do not split a module until it exceeds ~600 lines or gains a second consumer.
-- Asset URLs always go through `asset()` in `src/assets.ts`; never hard-code `/assets/...`.
-
-## Assets and deployment
-
-- `public/assets/` is the local asset source, served by Vite in dev.
-- `VITE_ASSET_BASE_URL` (see `.env.example`) switches every asset to a CDN such as Cloudflare R2
-  at build time. When unset, assets resolve relative to the deployed `index.html`.
-- `vite.config.ts` uses `base: "./"` so `dist/` works from any host or subpath, including an R2
-  bucket. Upload `public/assets` to the CDN, build with the CDN base URL, and upload `dist/`.
-- `preloadGameAssets()` in `src/assets.ts` warms the browser cache in the background after first
-  paint; every asset also loads on demand, so preload failures are never fatal.
-
-## Definition of a first playable version
-
-- The title screen can start the game.
-- The cinematic can complete and be skipped.
-- Keyboard and touch controls both operate the primary loop.
-- Portrait and landscape preserve the map ratio and keep the player visible.
-- The game has a reachable success state and a recoverable failure state.
-- All referenced assets resolve locally or from the configured CDN.
-- `npm run typecheck` and `npm run build` pass.
+The original playable stealth example is preserved on example/marlinspike.

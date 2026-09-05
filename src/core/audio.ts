@@ -4,13 +4,12 @@ export interface AudioClipDefinition {
 }
 
 export interface AudioManifest {
-  music: AudioClipDefinition;
-  ambience: AudioClipDefinition;
+  music?: AudioClipDefinition;
+  ambience?: AudioClipDefinition;
   secondaryLoop?: AudioClipDefinition;
   sfx: Record<string, AudioClipDefinition>;
   voices: {
-    root: string;
-    extension: string;
+    clips: Record<string, AudioClipDefinition>;
     volume: number;
     duckedMusicVolume: number;
   };
@@ -29,6 +28,7 @@ interface ActiveLoop {
 export class AudioController {
   private readonly manifest: AudioManifest;
   private muted = false;
+  private voiceRequest = 0;
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private loops = new Map<"music" | "ambience" | "secondary", ActiveLoop>();
@@ -59,8 +59,8 @@ export class AudioController {
       jobs.push(this.loadBuffer("loop:secondary", manifest.secondaryLoop.src));
     }
     jobs.push(
-      this.loadBuffer("loop:music", manifest.music.src),
-      this.loadBuffer("loop:ambience", manifest.ambience.src),
+      ...(manifest.music ? [this.loadBuffer("loop:music", manifest.music.src)] : []),
+      ...(manifest.ambience ? [this.loadBuffer("loop:ambience", manifest.ambience.src)] : []),
       ...Object.entries(manifest.sfx).map(([name, clip]) =>
         this.loadBuffer(`sfx:${name}`, clip.src),
       ),
@@ -94,8 +94,8 @@ export class AudioController {
     if (!ctx) return;
     void ctx.resume().catch(() => undefined);
     if (!this.loopsWanted || this.muted) return;
-    this.startLoop("music", this.manifest.music);
-    this.startLoop("ambience", this.manifest.ambience);
+    if (this.manifest.music) this.startLoop("music", this.manifest.music);
+    if (this.manifest.ambience) this.startLoop("ambience", this.manifest.ambience);
     if (this.secondaryActive && this.manifest.secondaryLoop) {
       this.startLoop("secondary", this.manifest.secondaryLoop);
     }
@@ -149,9 +149,13 @@ export class AudioController {
     const ctx = this.context();
     if (!ctx || !this.master) return;
     this.stopVoice();
-    const { root, extension, volume } = this.manifest.voices;
+    const clip = this.manifest.voices.clips[id];
+    if (!clip) return;
+    const request = this.voiceRequest;
+    const volume = clip.volume * this.manifest.voices.volume;
     this.setDucked(true);
-    void this.loadBuffer(`voice:${id}`, `${root}/${id}.${extension}`).then((buffer) => {
+    void this.loadBuffer(`voice:${id}`, clip.src).then((buffer) => {
+      if (request !== this.voiceRequest) return;
       if (!buffer || !this.ctx || !this.master) {
         this.setDucked(false);
         return;
@@ -165,8 +169,7 @@ export class AudioController {
       this.voice = { source, gain };
       source.onended = () => {
         gain.disconnect();
-        if (this.voice?.source === source) this.voice = null;
-        this.setDucked(false);
+        if (this.voice?.source === source) { this.voice = null; this.setDucked(false); }
       };
       source.start();
     });
@@ -219,6 +222,8 @@ export class AudioController {
   }
 
   private stopVoice(): void {
+    this.voiceRequest += 1;
+    this.setDucked(false);
     const voice = this.voice;
     if (!voice) return;
     this.voice = null;
@@ -236,7 +241,7 @@ export class AudioController {
     const music = this.loops.get("music");
     if (music && this.ctx) {
       music.gain.gain.setTargetAtTime(
-        ducked ? this.manifest.voices.duckedMusicVolume : this.manifest.music.volume,
+        ducked ? this.manifest.voices.duckedMusicVolume : (this.manifest.music?.volume ?? 0),
         this.ctx.currentTime,
         0.08,
       );
