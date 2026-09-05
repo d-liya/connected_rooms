@@ -58,29 +58,29 @@ export function ActorSprite({
   const duration = durationSeconds ?? active.frames / active.fps;
   const progress = seconds / Math.max(duration, 0.001);
   const frame = loop ? Math.floor(progress * active.frames) % active.frames : Math.min(active.frames - 1, Math.floor(progress * active.frames));
-  sheet = active;
+  // Keep the requested sheet immutable: the decode effect closes over it.
   const frameWorldWidth =
-    (sheet.height * (sheet.frameWidth / sheet.frameHeight)) / aspectRatio;
-  const left = x - frameWorldWidth * sheet.anchorX;
-  const top = groundY - sheet.height * sheet.anchorY;
+    (active.height * (active.frameWidth / active.frameHeight)) / aspectRatio;
+  const left = x - frameWorldWidth * active.anchorX;
+  const top = groundY - active.height * active.anchorY;
   const style = {
     left: `${left / 10}%`,
     top: `${top / 10}%`,
     width: `${frameWorldWidth / 10}%`,
-    height: `${sheet.height / 10}%`,
-    backgroundImage: `url(${sheet.src})`,
+    height: `${active.height / 10}%`,
+    backgroundImage: `url(${active.src})`,
     animation: "none",
-    backgroundPosition: `${sheet.frames > 1 ? frame / (sheet.frames - 1) * 100 : 0}% 0`,
-    backgroundSize: `${sheet.frames * 100}% 100%`,
-    "--sprite-duration": `${sheet.frames / sheet.fps}s`,
-    "--sprite-steps": Math.max(1, sheet.frames - 1),
-    "--sprite-anchor": `${sheet.anchorX * 100}%`,
+    backgroundPosition: `${active.frames > 1 ? frame / (active.frames - 1) * 100 : 0}% 0`,
+    backgroundSize: `${active.frames * 100}% 100%`,
+    "--sprite-duration": `${active.frames / active.fps}s`,
+    "--sprite-steps": Math.max(1, active.frames - 1),
+    "--sprite-anchor": `${active.anchorX * 100}%`,
   } as CSSProperties;
 
   return (
     <div
       aria-label={label}
-      className={`character-sprite ${sheet.frames > 1 ? "character-sprite--animated" : ""} ${
+      className={`character-sprite ${active.frames > 1 ? "character-sprite--animated" : ""} ${
         facing === "left" ? "character-sprite--left" : ""
       } ${hidden ? "character-sprite--hidden" : ""} ${className}`}
       role="img"
