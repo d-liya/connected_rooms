@@ -74,7 +74,6 @@ export function TouchControls({
     },
     onPointerUp: () => onDirection(direction, false),
     onPointerCancel: () => onDirection(direction, false),
-    onLostPointerCapture: () => onDirection(direction, false),
     onContextMenu: (event: React.MouseEvent) => event.preventDefault(),
   });
 

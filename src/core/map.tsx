@@ -40,7 +40,7 @@ export interface CameraFrame {
 
 // Cover-scale the 1000-unit world over the frame and center the focus point,
 // clamping at the world edges so out-of-bounds area is never shown. focusX is
-// 0..1000, focusY is 0..1000, just like focusX.
+// 0..1000, focusY is 0..100 (percent of stage height, matching child layout).
 // Returns null when the frame should show the complete map instead.
 export function cameraFrame(
   frameWidth: number,
@@ -57,7 +57,7 @@ export function cameraFrame(
     width,
     height,
     offsetX: followingCameraOffset(focusX / WORLD_SIZE, frameWidth, width),
-    offsetY: followingCameraOffset(focusY / WORLD_SIZE, frameHeight, height),
+    offsetY: followingCameraOffset(focusY / 100, frameHeight, height),
     followX: width > frameWidth + 1,
     followY: height > frameHeight + 1,
   };
@@ -105,7 +105,7 @@ export function MapViewport({
   };
 
   return (
-    <div style={{ aspectRatio }} className={`stage-frame${frame ? " stage-frame--follow" : ""}`} ref={frameRef}>
+    <div className={`stage-frame${frame ? " stage-frame--follow" : ""}`} ref={frameRef}>
       <div
         aria-label={ariaLabel}
         className={`game-stage${frame ? " game-stage--camera" : ""} ${

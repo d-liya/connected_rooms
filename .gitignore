@@ -2,7 +2,3 @@ node_modules/
 dist/
 .DS_Store
 *.local
-
-.cache/
-
-node_modules
