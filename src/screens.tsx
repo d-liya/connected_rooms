@@ -1,4 +1,4 @@
-import { ArrowRight, Eye, FastForward, FileSearch, Headphones, KeyRound, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, FastForward, Headphones, Volume2, VolumeX } from "lucide-react";
 import { useEffect, type CSSProperties, type ReactNode } from "react";
 import { useElementSize, useTimedSequence } from "./core/hooks";
 import { coverWorldWidth, followingCameraOffset } from "./core/map";
@@ -95,11 +95,7 @@ export function CinematicIntro({
               style={{ left: `${beat.focus.x}%`, top: `${beat.focus.y}%` }}
             >
               <img
-                src={
-                  beat.marker === "final-objective"
-                    ? ACTIVE_GAME.assets.finalObjective.locked
-                    : ACTIVE_GAME.assets.clue
-                }
+                src={ACTIVE_GAME.assets.images[beat.marker]}
                 alt=""
               />
             </div>
@@ -191,9 +187,9 @@ export function TitleScreen({ onStart, ready, progress }: TitleScreenProps) {
         <h1 id="case-file-heading">{ACTIVE_GAME.copy.title}</h1>
         <p>{ACTIVE_GAME.copy.titleSummary}</p>
         <div className="case-file__rules">
-          <span><Eye aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[0]}</span>
-          <span><FileSearch aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[1]}</span>
-          <span><KeyRound aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[2]}</span>
+          {ACTIVE_GAME.copy.titleRules.map((rule, index) => (
+            <span key={index}><ArrowRight aria-hidden="true" /> {rule}</span>
+          ))}
         </div>
         <button
           className="primary-button"

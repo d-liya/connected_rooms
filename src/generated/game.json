@@ -1,0 +1,145 @@
+{
+  "id": "",
+  "presentation": {
+    "themeClass": "",
+    "aspectRatio": 1.7777777777777777,
+    "maxStageWidth": 1000
+  },
+  "assets": {
+    "titleArt": "assets/world.svg",
+    "world": "assets/world.svg",
+    "images": {},
+    "characters": {
+      "player": {
+        "idle": {
+          "src": "assets/player.svg",
+          "frameWidth": 60,
+          "frameHeight": 100,
+          "frames": 1,
+          "fps": 1,
+          "height": 130,
+          "anchorX": 0.5,
+          "anchorY": 1
+        }
+      }
+    },
+    "audio": {
+      "music": {
+        "src": "assets/silence.wav",
+        "volume": 0
+      },
+      "ambience": {
+        "src": "assets/silence.wav",
+        "volume": 0
+      },
+      "sfx": {},
+      "voices": {
+        "root": "assets/voices",
+        "extension": "wav",
+        "volume": 0.8,
+        "duckedMusicVolume": 0.1
+      }
+    }
+  },
+  "copy": {
+    "caseLabel": "CONNECTED ROOMS",
+    "locationName": "Your world",
+    "titleEyebrow": "READY FOR YOUR STORY",
+    "title": "Connected Rooms",
+    "titleSummary": "A reusable foundation. Supply your world, characters, and gameplay.",
+    "titleRules": [
+      "Move through the world",
+      "Explore connected rooms",
+      "Build your own interactions"
+    ],
+    "startLabel": "Start",
+    "credits": "CONNECTED ROOMS TEMPLATE"
+  },
+  "intro": {
+    "establishingMs": 800,
+    "skipLabel": "Skip intro",
+    "beats": [
+      {
+        "id": "overview",
+        "kicker": "YOUR WORLD",
+        "title": "A connected world",
+        "description": "The generated shot list introduces your game.",
+        "focus": {
+          "x": 50,
+          "y": 50,
+          "zoom": 1
+        },
+        "durationMs": 1800
+      },
+      {
+        "id": "entry",
+        "kicker": "BEGIN",
+        "title": "Your starting point",
+        "description": "Move with A/D or arrows. Use E or Space at a doorway.",
+        "focus": {
+          "x": 18,
+          "y": 80,
+          "zoom": 1
+        },
+        "showPlayer": true,
+        "settleToGameplay": true,
+        "durationMs": 1400
+      }
+    ]
+  },
+  "world": {
+    "startRoom": "lower",
+    "rooms": [
+      {
+        "id": "lower",
+        "label": "Lower room",
+        "groundY": 890,
+        "band": {
+          "top": 50,
+          "bottom": 90
+        },
+        "bounds": {
+          "left": 80,
+          "right": 920
+        },
+        "spawnX": 180
+      },
+      {
+        "id": "upper",
+        "label": "Upper room",
+        "groundY": 445,
+        "band": {
+          "top": 5,
+          "bottom": 45
+        },
+        "bounds": {
+          "left": 80,
+          "right": 920
+        },
+        "spawnX": 850
+      }
+    ],
+    "connections": [
+      {
+        "id": "up",
+        "from": "lower",
+        "to": "upper",
+        "x": 850,
+        "targetX": 850,
+        "label": "Go upstairs"
+      },
+      {
+        "id": "down",
+        "from": "upper",
+        "to": "lower",
+        "x": 850,
+        "targetX": 850,
+        "label": "Go downstairs"
+      }
+    ]
+  },
+  "player": {
+    "assetId": "player",
+    "speed": 220
+  }
+}

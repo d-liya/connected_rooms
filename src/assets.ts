@@ -1,4 +1,4 @@
-import type { GameDefinition } from "./mechanics/stealth/model";
+import type { GameDefinition } from "./game";
 
 // Root URL for every game asset (images, audio, voices). Set VITE_ASSET_BASE_URL
 // at build time to serve assets from a CDN such as Cloudflare R2, e.g.
@@ -25,10 +25,7 @@ function collectImageUrls(game: GameDefinition): string[] {
   return [
     game.assets.titleArt,
     game.assets.world,
-    game.assets.portrait,
-    game.assets.clue,
-    game.assets.finalObjective.locked,
-    ...game.assets.finalObjective.opening,
+    ...Object.values(game.assets.images),
     ...sheets,
   ];
 }

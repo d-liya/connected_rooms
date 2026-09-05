@@ -1,36 +1,60 @@
-// Story selection point for the template. To ship another stealth story, point
-// ACTIVE_GAME at a different story package. (The gameplay runtime is selected
-// by the ActiveExperience import in main.tsx.)
-import { AudioController } from "./core/audio";
-import { marlinspikeGame } from "./games/marlinspike";
+import { AudioController, type AudioManifest } from "./core/audio";
+import type { SpriteSheetDefinition } from "./core/sprites";
 import { asset } from "./assets";
+import definition from "./generated/game.json";
 import generatedMetadata from "./generated/metadata.json";
 
-// Prepared by the asset pipeline. Empty metadata keeps the example playable.
-// This changes content only: camera, controls, intro timing and audio stay intact.
-interface GameMetadata {
-  chatId?: string;
-  thumbnailUrl?: string;
-  copy?: Partial<typeof marlinspikeGame.copy>;
+export interface IntroBeat {
+  id: string; kicker: string; title: string; description: string;
+  focus: { x: number; y: number; zoom: number }; // percentages, matching tested cinematic
+  marker?: string; showPlayer?: boolean; showCaption?: boolean; showInRoute?: boolean;
+  settleToGameplay?: boolean; cameraDurationMs?: number; durationMs: number;
 }
-const metadata: GameMetadata = generatedMetadata;
-export const GAME_ID =
-  ((import.meta.env.VITE_GAME_ID as string | undefined) ?? "").trim() ||
-  metadata.chatId?.trim() || marlinspikeGame.id;
-const thumbnailUrl =
-  ((import.meta.env.VITE_THUMBNAIL_URL as string | undefined) ?? "").trim() ||
-  metadata.thumbnailUrl?.trim();
-const ACTIVE_GAME: typeof marlinspikeGame = {
-  ...marlinspikeGame,
-  id: GAME_ID,
+export interface GameDefinition {
+  id: string;
+  presentation: { themeClass: string; aspectRatio: number; maxStageWidth: number };
   assets: {
-    ...marlinspikeGame.assets,
-    titleArt: thumbnailUrl ? asset(thumbnailUrl) : marlinspikeGame.assets.titleArt,
+    titleArt: string; world: string; images: Record<string, string>;
+    characters: Record<string, Record<string, SpriteSheetDefinition>>;
+    audio: AudioManifest;
+  };
+  copy: {
+    caseLabel: string; locationName: string; titleEyebrow: string; title: string;
+    titleSummary: string; titleRules: string[]; startLabel: string; credits: string;
+  };
+  intro: { establishingMs: number; skipLabel: string; beats: IntroBeat[] };
+  world: {
+    startRoom: string;
+    rooms: Array<{ id: string; label: string; groundY: number;
+      band: { top: number; bottom: number }; bounds: { left: number; right: number }; spawnX: number }>;
+    connections: Array<{ id: string; from: string; to: string; x: number; targetX: number; label: string }>;
+  };
+  player: { assetId: string; speed: number };
+}
+interface GameMetadata { chatId?: string; thumbnailUrl?: string; copy?: Partial<GameDefinition["copy"]> }
+const metadata: GameMetadata = generatedMetadata;
+const source: GameDefinition = definition;
+export const GAME_ID = (import.meta.env.VITE_GAME_ID ?? "").trim() || metadata.chatId?.trim() || source.id;
+const thumbnail = (import.meta.env.VITE_THUMBNAIL_URL ?? "").trim() || metadata.thumbnailUrl?.trim() || source.assets.titleArt;
+export const ACTIVE_GAME: GameDefinition = {
+  ...source, id: GAME_ID,
+  copy: { ...source.copy, ...metadata.copy },
+  assets: {
+    ...source.assets, titleArt: asset(thumbnail), world: asset(source.assets.world),
+    images: Object.fromEntries(Object.entries(source.assets.images).map(([id, url]) => [id, asset(url)])),
+    characters: Object.fromEntries(Object.entries(source.assets.characters).map(([id, states]) =>
+      [id, Object.fromEntries(Object.entries(states).map(([state, sheet]) => [state, { ...sheet, src: asset(sheet.src) }]))])),
+    audio: {
+      ...source.assets.audio,
+      music: { ...source.assets.audio.music, src: asset(source.assets.audio.music.src) },
+      ambience: { ...source.assets.audio.ambience, src: asset(source.assets.audio.ambience.src) },
+      secondaryLoop: source.assets.audio.secondaryLoop
+        ? { ...source.assets.audio.secondaryLoop, src: asset(source.assets.audio.secondaryLoop.src) } : undefined,
+      sfx: Object.fromEntries(Object.entries(source.assets.audio.sfx).map(([id, clip]) => [id, { ...clip, src: asset(clip.src) }])),
+      voices: { ...source.assets.audio.voices, root: asset(source.assets.audio.voices.root) },
+    },
   },
-  copy: { ...marlinspikeGame.copy, ...metadata.copy },
 };
-
-export { ACTIVE_GAME };
 
 // Gameplay analytics (Capybara game server). Every story's GameDefinition.id is
 // the remote gameId reported by the client below; a deploy can override it
