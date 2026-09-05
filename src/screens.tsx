@@ -1,9 +1,8 @@
-import { FastForward, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, Eye, FastForward, FileSearch, Headphones, KeyRound, Volume2, VolumeX } from "lucide-react";
 import { useEffect, type CSSProperties, type ReactNode } from "react";
-import { useTimedSequence } from "../core/cinematic/useTimedSequence";
-import { useElementSize } from "../core/hooks/useElementSize";
-import { coverWorldWidth, followingCameraOffset } from "../core/map/camera";
-import { ACTIVE_GAME } from "../game/activeGame";
+import { useElementSize, useTimedSequence } from "./core/hooks";
+import { coverWorldWidth, followingCameraOffset } from "./core/map";
+import { ACTIVE_GAME } from "./game";
 
 interface CinematicIntroProps {
   muted: boolean;
@@ -52,7 +51,7 @@ export function CinematicIntro({
   const worldStyle = beat?.settleToGameplay
     ? portrait
       ? {
-          left: `${followingCameraOffset(startX, frameSize.width, gameplayWorldWidth)}px`,
+          left: `${followingCameraOffset(startX / 1000, frameSize.width, gameplayWorldWidth)}px`,
           top: "0px",
           width: `${gameplayWorldWidth}px`,
           height: `${frameSize.height}px`,
@@ -170,6 +169,62 @@ export function CinematicIntro({
           </button>
         </div>
       </div>
+    </main>
+  );
+}
+
+interface TitleScreenProps {
+  onStart: () => void;
+  ready: boolean;
+  progress: number;
+}
+
+export function TitleScreen({ onStart, ready, progress }: TitleScreenProps) {
+  const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
+  return (
+    <main className="title-screen">
+      <img className="title-screen__art" src={ACTIVE_GAME.assets.titleArt} alt="Marlinspike Manor at night" />
+      <div className="title-screen__veil" />
+      <section className="case-file" aria-labelledby="case-file-heading">
+        <div className="case-file__stamp">{ACTIVE_GAME.copy.caseLabel}</div>
+        <p className="case-file__eyebrow">{ACTIVE_GAME.copy.titleEyebrow}</p>
+        <h1 id="case-file-heading">{ACTIVE_GAME.copy.title}</h1>
+        <p>{ACTIVE_GAME.copy.titleSummary}</p>
+        <div className="case-file__rules">
+          <span><Eye aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[0]}</span>
+          <span><FileSearch aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[1]}</span>
+          <span><KeyRound aria-hidden="true" /> {ACTIVE_GAME.copy.titleRules[2]}</span>
+        </div>
+        <button
+          className="primary-button"
+          onClick={onStart}
+          disabled={!ready}
+          aria-busy={!ready}
+          autoFocus
+        >
+          {ready ? (
+            <>{ACTIVE_GAME.copy.startLabel} <ArrowRight aria-hidden="true" /></>
+          ) : (
+            <>Loading the manor… {percent}%</>
+          )}
+        </button>
+        {!ready && (
+          <div
+            className="case-file__loadbar"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+            aria-label="Loading game assets"
+          >
+            <span style={{ width: `${percent}%` }} />
+          </div>
+        )}
+        <div className="case-file__audio">
+          <Headphones aria-hidden="true" size={15} /> Best played with sound
+        </div>
+      </section>
+      <div className="title-screen__credit">{ACTIVE_GAME.copy.credits}</div>
     </main>
   );
 }

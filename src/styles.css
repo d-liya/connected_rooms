@@ -19,6 +19,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
@@ -31,9 +32,24 @@ body,
   overflow: hidden;
 }
 
+/* Games have no selectable text: no tap flashes, callouts, or selection
+   anywhere. Keyboard focus rings (:focus-visible) are intentionally kept so
+   keyboard play stays navigable. */
+body {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-touch-callout: none;
+}
+
 button {
   color: inherit;
   font: inherit;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 button:focus-visible {
@@ -189,6 +205,29 @@ button:focus-visible {
   width: 18px;
 }
 
+.primary-button:disabled {
+  opacity: 0.75;
+  cursor: wait;
+  transform: none;
+}
+
+.case-file__loadbar {
+  height: 10px;
+  margin-top: 10px;
+  overflow: hidden;
+  background: rgba(18, 27, 26, 0.18);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+}
+
+.case-file__loadbar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #b57e2c, #e2ad3e);
+  border-radius: 999px;
+  transition: width 200ms ease;
+}
+
 .case-file__audio {
   display: flex;
   align-items: center;
@@ -224,6 +263,7 @@ button:focus-visible {
 
 .cinematic__frame {
   position: relative;
+  container-type: inline-size;
   width: min(100vw, var(--game-max-width), calc(100svh * var(--game-aspect)));
   max-height: 100svh;
   aspect-ratio: var(--game-aspect);
@@ -407,18 +447,20 @@ button:focus-visible {
   bottom: clamp(34px, 7.5%, 78px);
   left: clamp(26px, 6%, 86px);
   width: min(430px, 66%);
-  padding: 1px 0 2px clamp(12px, 1.2vw, 19px);
+  padding: 10px clamp(14px, 1.6vw, 22px) 12px clamp(12px, 1.2vw, 19px);
   color: #fff2c4;
+  background: linear-gradient(90deg, rgba(2, 10, 12, 0.72), rgba(2, 10, 12, 0.38) 72%, transparent);
   border-left: max(2px, 0.18vw) solid rgba(226, 173, 62, 0.92);
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.95);
-  filter: drop-shadow(0 7px 16px rgba(0, 0, 0, 0.72));
-  animation: cinematic-caption-in 620ms 160ms cubic-bezier(0.22, 0.75, 0.22, 1) both;
+  border-radius: 0 6px 6px 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+  animation: cinematic-caption-in 380ms ease-out;
 }
 
 .cinematic__caption p {
   margin: 0 0 5px;
   color: #e2bd5d;
   font-size: clamp(0.48rem, 0.56vw, 0.62rem);
+  font-size: clamp(0.7rem, 1.2cqw, 0.85rem);
   font-weight: 900;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -428,6 +470,7 @@ button:focus-visible {
   margin: 0;
   font-family: Georgia, serif;
   font-size: clamp(1.15rem, 2vw, 2rem);
+  font-size: clamp(1.3rem, 2.9cqw, 2.1rem);
   font-weight: 600;
   line-height: 1.05;
   letter-spacing: -0.02em;
@@ -439,11 +482,12 @@ button:focus-visible {
   margin-top: 7px;
   color: rgba(255, 240, 197, 0.68);
   font-size: clamp(0.6rem, 0.7vw, 0.76rem);
+  font-size: clamp(0.75rem, 1.35cqw, 0.95rem);
   line-height: 1.4;
 }
 
 @keyframes cinematic-caption-in {
-  from { opacity: 0; transform: translateY(8px); filter: blur(3px); }
+  from { opacity: 0; transform: translateY(6px); }
 }
 
 .cinematic__establishing {
@@ -464,6 +508,7 @@ button:focus-visible {
 .cinematic__establishing span {
   color: #d7b65d;
   font-size: clamp(0.55rem, 0.72vw, 0.78rem);
+  font-size: clamp(0.7rem, 1.4cqw, 0.95rem);
   font-weight: 900;
   letter-spacing: 0.2em;
 }
@@ -471,6 +516,7 @@ button:focus-visible {
 .cinematic__establishing strong {
   font-family: Georgia, serif;
   font-size: clamp(1.8rem, 4.6vw, 5.2rem);
+  font-size: clamp(2rem, 6.6cqw, 5.2rem);
   line-height: 1;
 }
 
@@ -596,15 +642,15 @@ button:focus-visible {
   right: 0;
   left: 0;
   z-index: 4;
-  background: rgba(2, 11, 14, 0.61);
-  backdrop-filter: saturate(0.62) brightness(0.74);
+  /* Flat overlay only: backdrop-filter here forced a full-stage repaint on
+     every frame and stalled phone GPUs while the player moved. */
+  background: rgba(2, 11, 14, 0.68);
   transition: background 350ms ease;
   pointer-events: none;
 }
 
 .floor-shade--active {
   background: transparent;
-  backdrop-filter: none;
 }
 
 .floor-plaque {
@@ -625,12 +671,14 @@ button:focus-visible {
 .floor-plaque span {
   color: #8b5a27;
   font-size: clamp(5px, 0.46vw, 9px);
+  font-size: clamp(10px, 1.1cqw, 13px);
   font-weight: 900;
   letter-spacing: 0.12em;
 }
 
 .floor-plaque strong {
   font-size: clamp(7px, 0.64vw, 12px);
+  font-size: clamp(12px, 1.6cqw, 18px);
   line-height: 1.05;
 }
 
@@ -654,6 +702,7 @@ button:focus-visible {
   background: #f2d77e;
   border: 1px solid #171914;
   font-size: clamp(5px, 0.48vw, 9px);
+  font-size: clamp(10px, 1.2cqw, 13px);
   font-weight: 800;
   white-space: nowrap;
   transform: translateX(-50%);
@@ -698,6 +747,7 @@ button:focus-visible {
   align-items: center;
   gap: 4px;
   width: clamp(28px, 3.4vw, 58px);
+  width: clamp(42px, 5.6cqw, 66px);
   padding: 3px 5px;
   color: #22332f;
   background: rgba(248, 230, 171, 0.88);
@@ -717,6 +767,7 @@ button:focus-visible {
 
 .suspicion svg {
   width: clamp(7px, 0.7vw, 13px);
+  width: clamp(10px, 1.2cqw, 14px);
   height: auto;
   flex: 0 0 auto;
 }
@@ -724,6 +775,7 @@ button:focus-visible {
 .suspicion__track {
   flex: 1;
   height: clamp(3px, 0.34vw, 6px);
+  height: clamp(4px, 0.55cqw, 7px);
   overflow: hidden;
   background: rgba(57, 54, 39, 0.2);
   border-radius: 999px;
@@ -810,6 +862,7 @@ button:focus-visible {
   right: -26%;
   display: grid;
   width: clamp(14px, 1.4vw, 25px);
+  width: clamp(20px, 2.6cqw, 30px);
   aspect-ratio: 1;
   color: #fff0b5;
   background: #9d5b24;
@@ -832,8 +885,10 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: clamp(4px, 0.45vw, 8px);
+  gap: clamp(6px, 0.9cqw, 10px);
   min-width: max-content;
   padding: clamp(3px, 0.35vw, 7px) clamp(5px, 0.55vw, 10px);
+  padding: clamp(6px, 0.8cqw, 9px) clamp(8px, 1.2cqw, 13px);
   color: #16201d;
   background: rgba(255, 239, 184, 0.96);
   border: max(1px, 0.12vw) solid #121512;
@@ -853,7 +908,9 @@ button:focus-visible {
 .interaction-prompt__key {
   display: grid;
   min-width: clamp(18px, 1.65vw, 28px);
+  min-width: clamp(24px, 3cqw, 34px);
   height: clamp(18px, 1.65vw, 28px);
+  height: clamp(24px, 3cqw, 34px);
   padding: 0 3px;
   color: #fff2c2;
   background: #173f41;
@@ -861,6 +918,7 @@ button:focus-visible {
   border-radius: 3px;
   place-items: center;
   font-size: clamp(7px, 0.62vw, 11px);
+  font-size: clamp(11px, 1.3cqw, 15px);
   font-weight: 900;
 }
 
@@ -872,12 +930,14 @@ button:focus-visible {
 
 .interaction-prompt strong {
   font-size: clamp(6px, 0.63vw, 11px);
+  font-size: clamp(11px, 1.4cqw, 16px);
   line-height: 1.1;
 }
 
 .interaction-prompt small {
   color: inherit;
   font-size: clamp(5px, 0.46vw, 8px);
+  font-size: clamp(10px, 1.15cqw, 13px);
   opacity: 0.72;
 }
 
@@ -892,6 +952,7 @@ button:focus-visible {
   width: min(29%, 410px);
   min-width: 190px;
   padding: clamp(5px, 0.55vw, 10px) clamp(8px, 0.8vw, 15px);
+  padding: clamp(8px, 1.2cqw, 13px) clamp(10px, 1.6cqw, 18px);
   color: #15201f;
   background: rgba(255, 244, 207, 0.97);
   border: max(1px, 0.13vw) solid #151612;
@@ -919,6 +980,7 @@ button:focus-visible {
   display: block;
   color: #99612c;
   font-size: clamp(5px, 0.48vw, 9px);
+  font-size: clamp(10px, 1.1cqw, 13px);
   font-weight: 900;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -928,6 +990,7 @@ button:focus-visible {
   margin: 1px 0 0;
   font-family: Georgia, serif;
   font-size: clamp(7px, 0.7vw, 13px);
+  font-size: clamp(13px, 1.6cqw, 18px);
   font-weight: 700;
   line-height: 1.25;
 }
@@ -951,6 +1014,7 @@ button:focus-visible {
   border: 1px solid rgba(252, 222, 141, 0.4);
   border-radius: 999px;
   font-size: clamp(5px, 0.46vw, 8px);
+  font-size: clamp(10px, 1.2cqw, 14px);
   font-weight: 700;
   transform: translateX(-50%);
   white-space: nowrap;
@@ -978,6 +1042,7 @@ button:focus-visible {
 
 .caught-flash svg {
   width: clamp(26px, 4vw, 66px);
+  width: clamp(30px, 5.5cqw, 68px);
   height: auto;
   margin-bottom: 0.5%;
 }
@@ -985,6 +1050,7 @@ button:focus-visible {
 .caught-flash strong {
   font-family: Georgia, serif;
   font-size: clamp(1.4rem, 3.3vw, 3.8rem);
+  font-size: clamp(1.6rem, 5cqw, 3.8rem);
   letter-spacing: 0.06em;
   text-shadow: 3px 3px 0 #531d17;
 }
@@ -992,6 +1058,7 @@ button:focus-visible {
 .caught-flash span,
 .transition-card span {
   font-size: clamp(0.65rem, 1vw, 1rem);
+  font-size: clamp(0.8rem, 1.8cqw, 1.1rem);
   font-weight: 800;
 }
 
@@ -1009,6 +1076,7 @@ button:focus-visible {
 
 .transition-card svg {
   width: clamp(22px, 3vw, 52px);
+  width: clamp(26px, 4.2cqw, 54px);
   height: auto;
 }
 
@@ -1023,6 +1091,7 @@ button:focus-visible {
   margin-top: 3px;
   font-family: Georgia, serif;
   font-size: clamp(1.1rem, 2.5vw, 2.8rem);
+  font-size: clamp(1.3rem, 3.8cqw, 2.8rem);
 }
 
 @keyframes transition-wipe {
@@ -1069,6 +1138,7 @@ button:focus-visible {
 .hud__portrait {
   width: clamp(30px, 3.4vw, 54px);
   aspect-ratio: 1;
+  flex: 0 0 auto;
   overflow: hidden;
   background: #7eb6c2;
   border: max(1px, 0.12vw) solid #121411;
@@ -1433,11 +1503,196 @@ kbd {
   .hud { width: calc(100vw - 14px); gap: 5px; }
   .hud__identity { min-width: 0; }
   .hud__name { display: none; }
-  .hud__portrait { width: 30px; }
+  .hud__portrait { width: 40px; }
   .hud__objective { width: min(92vw, 430px); }
+  .hud__objective-row { font-size: 0.68rem; }
+  .hud__objective strong { font-size: 0.85rem; }
+  .hud__clues { font-size: 0.75rem; }
+  .game-shell__footer { font-size: 0.7rem; }
   .hud__buttons { margin-right: 74px; }
   .dialogue { min-width: 160px; }
   .help-grid { grid-template-columns: 1fr; max-height: 38vh; overflow-y: auto; }
+}
+
+.game-root {
+  width: 100%;
+  height: 100%;
+}
+
+.stage-frame {
+  position: relative;
+  container-type: inline-size;
+  width: min(100vw, var(--game-max-width), calc(100svh * var(--game-aspect)));
+  max-height: 100svh;
+  aspect-ratio: var(--game-aspect);
+  overflow: hidden;
+  border: var(--stage-border, clamp(2px, 0.28vw, 5px) solid #0c1110);
+  background: var(--stage-background, #111);
+  box-shadow: var(--stage-shadow, 0 22px 65px rgba(0, 0, 0, 0.58));
+}
+
+.game-stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+  cursor: var(--stage-cursor, crosshair);
+}
+
+.game-stage--camera {
+  right: auto;
+  will-change: transform;
+}
+
+/* No transition during follow: the offset updates every frame and any
+   transition would trail behind the player. Floor changes keep a smooth
+   glide via the longer transition below. */
+.game-stage--camera-transition {
+  transition: transform 620ms cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+.character-sprite {
+  position: absolute;
+  z-index: 7;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  will-change: background-position, transform;
+  pointer-events: none;
+}
+
+.character-sprite--animated {
+  animation: sprite-cycle var(--sprite-duration) steps(var(--sprite-steps)) infinite;
+}
+
+.character-sprite--left {
+  transform: scaleX(-1);
+  transform-origin: var(--sprite-anchor) center;
+}
+
+.character-sprite--hidden {
+  opacity: 0.48;
+  filter: drop-shadow(0 0 0.3vw rgba(255, 230, 144, 0.9)) saturate(0.75);
+}
+
+@keyframes sprite-cycle {
+  to { background-position: 100% 0; }
+}
+
+.touch-controls {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 45;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* The move wrapper disappears from layout so the three buttons spread out:
+   move-left at the left edge, action centered, move-right at the right edge. */
+.touch-controls__move {
+  display: contents;
+}
+
+.touch-controls__move button:first-child { order: 1; }
+.touch-controls__move button:last-child { order: 3; }
+
+.touch-controls button {
+  display: grid;
+  width: 62px;
+  height: 56px;
+  color: var(--touch-color, #ffe8a6);
+  background: var(--touch-background, rgba(8, 37, 41, 0.88));
+  border: 2px solid var(--touch-border, rgba(249, 222, 146, 0.8));
+  border-radius: 8px;
+  box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.55);
+  place-items: center;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-controls button:active {
+  box-shadow: 1px 1px 0 #000;
+  transform: translateY(3px);
+}
+
+.touch-controls__action {
+  display: flex !important;
+  flex-direction: column;
+  gap: 1px;
+  width: 68px !important;
+  height: 62px !important;
+  order: 2;
+}
+
+.touch-controls__action span {
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+/* Follow mode (set by MapViewport on small screens): the frame goes
+   full-bleed up to the 1k max width and the camera crops/follows instead of
+   showing the complete map. */
+.stage-frame--follow {
+  width: min(100vw, var(--game-max-width));
+  height: 100svh;
+  max-height: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.stage-frame--follow .game-stage {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+}
+
+@media (orientation: portrait) {
+  /* Stack vertically: stage fills the leftover space, caption and touch
+     controls sit in normal flow below the image instead of overlapping it. */
+  .game-shell {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
+  .stage-frame--follow {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .game-shell__footer {
+    position: static;
+    order: 2;
+    width: auto;
+    transform: none;
+    justify-content: center;
+    padding: 6px 12px 0;
+  }
+
+  .touch-controls {
+    position: static;
+    order: 3;
+    padding: 8px max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+}
+
+@media (hover: none), (max-width: 760px) {
+  .touch-controls { display: flex; }
 }
 
 @media (max-height: 650px) {

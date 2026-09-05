@@ -5,10 +5,12 @@ make a direct choice at one of two seams.
 
 ## Another stealth story
 
-1. Replace `GAME_SPEC.md`, then copy `marlinspike.ts` and its audio/voice files.
+1. Replace `GAME_SPEC.md`, then copy `marlinspike.ts` (audio manifest and voice banks included).
 2. Replace copy, floors, intro beats, assets, voice cues, and tuning in the new definition.
-3. Add the new local assets under `public/`.
-4. Change the single export in `../game/activeGame.ts`.
+   Keep `id` unique per story: it is the gameId reported to gameplay analytics.
+3. Add the new assets under `public/` and reference them through `asset()` from `../../assets`
+   so they work locally and from the CDN without code changes.
+4. Change the single story export in `../game.ts`.
 5. Add a theme class to `styles.css` if the new story needs a different visual language.
 
 No changes to movement, patrol, suspicion, input, checkpoints, or audio playback should be needed.
@@ -16,10 +18,10 @@ No changes to movement, patrol, suspicion, input, checkpoints, or audio playback
 ## A different mechanic
 
 For combat, dialogue adventure, or another genuinely different play loop, create a sibling to
-`../mechanics/stealth/`. Give that runtime its own state hook, rules file, stage, HUD,
-and input model, then change the export in `../game/activeRuntime.ts`.
+`../mechanics/stealth/`. Give that runtime its own model, engine, stage, and experience files,
+then change the single runtime import in `../main.tsx`.
 
-Share the title screen, cinematic component, schema fields, or audio controller only when they still
+Share the title screen, cinematic component, or audio controller only when they still
 fit. Do not widen the stealth state with health bars, weapons, inventories, or branching dialogue
 until a real second game proves those concepts are shared.
 

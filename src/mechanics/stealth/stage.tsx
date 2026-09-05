@@ -1,9 +1,9 @@
 import { ArrowDown, ArrowUp, Eye, EyeOff, LockKeyhole, Search } from "lucide-react";
-import { MapViewport } from "../../core/map/MapViewport";
-import { ACTIVE_GAME } from "../../game/activeGame";
-import { CLUES, FINAL_OBJECTIVE, FLOOR_CLUE, FLOOR_IDS, FLOOR_ROMAN, FLOORS, guardRange } from "./config";
-import type { GameState, GuardState, InteractionPrompt } from "./types";
-import { GuardSprite, PlayerSprite } from "./StealthSprites";
+import { MapViewport } from "../../core/map";
+import { ActorSprite } from "../../core/sprites";
+import { ACTIVE_GAME } from "../../game";
+import { CLUES, FINAL_OBJECTIVE, FLOOR_CLUE, FLOOR_IDS, FLOOR_ROMAN, FLOORS, guardRange } from "./model";
+import type { Direction, GameState, GuardState, InteractionPrompt } from "./model";
 
 interface GameStageProps {
   state: GameState;
@@ -41,6 +41,7 @@ export function StealthStage({ state, prompt, onInteract, onMove }: GameStagePro
       ariaLabel={`${floor.name}, floor ${state.floor}`}
       aspectRatio={ACTIVE_GAME.presentation.aspectRatio}
       focusX={state.playerX}
+      focusY={(floor.band.top + floor.band.bottom) / 2}
       onWorldPointerDown={({ x, y }) => {
           const relativeY = y / 10;
           if (relativeY < floor.band.top || relativeY > floor.band.bottom) return;
@@ -49,7 +50,7 @@ export function StealthStage({ state, prompt, onInteract, onMove }: GameStagePro
       overlay={overlay}
       transitioning={state.status === "transition"}
     >
-      {({ portrait }) => (
+      {({ followX }) => (
         <>
         <img className="game-stage__background" src={ACTIVE_GAME.assets.world} alt="" draggable={false} />
 
@@ -142,7 +143,7 @@ export function StealthStage({ state, prompt, onInteract, onMove }: GameStagePro
             aria-live="polite"
             className={`dialogue dialogue--${state.dialogue.tone ?? "normal"}`}
             style={{
-              left: portrait ? `${state.playerX / 10}%` : undefined,
+              left: followX ? `${state.playerX / 10}%` : undefined,
               top: `${dialogueTop}%`,
             }}
           >
@@ -213,5 +214,60 @@ function FinalObjective({ state, openStep }: { state: GameState["finalObjective"
         </span>
       )}
     </div>
+  );
+}
+
+interface PlayerSpriteProps {
+  x: number;
+  groundY: number;
+  facing: Direction;
+  moving: boolean;
+  hidden: boolean;
+  interacting: boolean;
+}
+
+export function PlayerSprite(props: PlayerSpriteProps) {
+  const sprites = ACTIVE_GAME.assets.characters.player;
+  const sheet = props.interacting
+    ? sprites.interact ?? sprites.idle
+    : props.moving
+      ? sprites.walk ?? sprites.idle
+      : sprites.idle;
+  return (
+    <ActorSprite
+      aspectRatio={ACTIVE_GAME.presentation.aspectRatio}
+      className="character-sprite--player"
+      facing={props.facing}
+      groundY={props.groundY}
+      hidden={props.hidden}
+      label={props.hidden ? `${ACTIVE_GAME.copy.playerName}, concealed` : ACTIVE_GAME.copy.playerName}
+      sheet={sheet}
+      x={props.x}
+    />
+  );
+}
+
+interface GuardSpriteProps {
+  guard: GuardState;
+  groundY: number;
+}
+
+export function GuardSprite({ guard, groundY }: GuardSpriteProps) {
+  const states = ACTIVE_GAME.assets.characters[guard.kind];
+  const sheet = guard.alert
+    ? states.alert ?? states.idle
+    : guard.motion === "patrol" && guard.pauseRemaining <= 0
+      ? states.patrol ?? states.idle
+      : states.idle;
+  return (
+    <ActorSprite
+      aspectRatio={ACTIVE_GAME.presentation.aspectRatio}
+      className={`character-sprite--guard character-sprite--${guard.kind}`}
+      facing={guard.facing}
+      groundY={groundY}
+      label={ACTIVE_GAME.copy.guardNames[guard.kind]}
+      sheet={sheet}
+      x={guard.x}
+    />
   );
 }

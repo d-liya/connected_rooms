@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { pickVoice } from "../../core/audio/voiceBanks";
-import { useHorizontalControls } from "../../core/input/useHorizontalControls";
-import { useAnimationFrame } from "../../core/loop/useAnimationFrame";
-import { ACTIVE_GAME } from "../../game/activeGame";
-import { createGameAudio, type AudioController } from "../../game/audio";
+import { waitForGameImages } from "../../assets";
+import { pickVoice } from "../../core/audio";
+import { useAnimationFrame } from "../../core/hooks";
+import { useHorizontalControls } from "../../core/input";
+import { ACTIVE_GAME, createGameAudio, type AudioController } from "../../game";
 import {
   CLUES,
   FINAL_OBJECTIVE,
@@ -12,22 +12,20 @@ import {
   NAVIGATION,
   REQUIRED_CLUE,
   SPAWNS,
+  canGuardSeePlayer,
   createClueState,
   createFailureState,
   createGuards,
-} from "./config";
+  detectionWindup,
+  updateGuardPatrol,
+} from "./model";
 import type {
   ClueId,
   Direction,
   GameState,
   GuardState,
   InteractionPrompt,
-} from "./types";
-import {
-  canGuardSeePlayer,
-  detectionWindup,
-  updateGuardPatrol,
-} from "./rules";
+} from "./model";
 
 const PLAYER_STEPS = ["step-1", "step-2", "step-3", "step-4"] as const;
 const GUARD_STEPS = ["guard-step-1", "guard-step-2", "guard-step-3", "guard-step-4"] as const;
@@ -65,6 +63,8 @@ export interface StealthEngine {
   state: InternalGameState;
   prompt: InteractionPrompt | null;
   muted: boolean;
+  assetsReady: boolean;
+  assetProgress: number;
   startGame: () => void;
   completeIntro: () => void;
   restartGame: () => void;
@@ -80,6 +80,8 @@ export function useStealthEngine(): StealthEngine {
   const [state, setState] = useState<InternalGameState>(() => initialState() as InternalGameState);
   const stateRef = useRef(state);
   const [muted, setMuted] = useState(false);
+  const [loadState, setLoadState] = useState({ fraction: 0, ready: false });
+  const readyRef = useRef(false);
   const audio = useRef<AudioController | null>(null);
   const stepAlternator = useRef(0);
   const autoTarget = useRef<number | null>(null);
@@ -101,6 +103,7 @@ export function useStealthEngine(): StealthEngine {
   }, []);
 
   const startGame = useCallback(() => {
+    if (!readyRef.current) return;
     const fresh = initialState("intro") as InternalGameState;
     setState(fresh);
     autoTarget.current = null;
@@ -372,12 +375,64 @@ export function useStealthEngine(): StealthEngine {
     };
   }, [state.status]);
 
-  useEffect(() => () => audio.current?.stop(), []);
+  // Mobile browsers may block the first play() or suspend audio when the page
+  // is backgrounded. Every gesture and foreground return re-asserts the
+  // intended loops; play() on already-playing audio is a no-op.
+  useEffect(() => {
+    const unlock = () => audio.current?.unlock();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") unlock();
+    };
+    window.addEventListener("pointerdown", unlock, { passive: true });
+    window.addEventListener("touchend", unlock, { passive: true });
+    window.addEventListener("keydown", unlock);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("touchend", unlock);
+      window.removeEventListener("keydown", unlock);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  // Tracked loading gate: images plus decoded audio report into one
+  // fraction. Start stays disabled until everything has settled (loads and
+  // failures both count), so pressing start never races an unloaded asset.
+  useEffect(() => {
+    let cancelled = false;
+    let imagesLoaded = 0;
+    let imagesTotal = 1;
+    let audioLoaded = 0;
+    let audioTotal = 1;
+    const report = () => {
+      if (cancelled) return;
+      const fraction = (imagesLoaded + audioLoaded) / (imagesTotal + audioTotal);
+      const ready = fraction >= 1;
+      readyRef.current = ready;
+      setLoadState({ fraction, ready });
+    };
+    audio.current?.preload((loaded, total) => {
+      audioLoaded = loaded;
+      audioTotal = Math.max(1, total);
+      report();
+    });
+    void waitForGameImages(ACTIVE_GAME, ({ loaded, total }) => {
+      imagesLoaded = loaded;
+      imagesTotal = Math.max(1, total);
+      report();
+    }).then(report);
+    return () => {
+      cancelled = true;
+      audio.current?.stop();
+    };
+  }, []);
 
   return {
     state,
     prompt,
     muted,
+    assetsReady: loadState.ready,
+    assetProgress: loadState.fraction,
     startGame,
     completeIntro: beginPlay,
     restartGame,

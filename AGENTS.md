@@ -12,7 +12,7 @@ Do not edit `src/core/` for story changes or mechanic-specific behavior. The cor
 - sprite sheets described by metadata rather than hard-coded in the renderer;
 - keyboard, pointer, and touch input;
 - requestAnimationFrame timing with clamped deltas;
-- manifest-driven local audio with voice ducking;
+- manifest-driven audio (local files or CDN) with voice ducking;
 - timed cinematic beats and a skippable handoff into gameplay.
 
 Change core only when the new brief explicitly changes one of those invariants.
@@ -20,16 +20,37 @@ Change core only when the new brief explicitly changes one of those invariants.
 ## Choose the smallest implementation path
 
 1. If the brief is another stealth game, create a story package under `src/games/` that satisfies
-   `src/mechanics/stealth/schema.ts`. Reuse the stealth runtime unchanged whenever possible.
+   the `GameDefinition` in `src/mechanics/stealth/model.ts`. Reuse the stealth runtime unchanged
+   whenever possible.
 2. If the brief has a different primary loop, create `src/mechanics/<mode>/` with its own state,
    rules, stage, HUD, and experience component. Reuse `src/core/` directly; do not add combat or
    dialogue-adventure fields to stealth types.
-3. Select the story in `src/game/activeGame.ts` and the runtime in `src/game/activeRuntime.ts`.
+3. Select the story in `src/game.ts` and the runtime in `src/main.tsx` (one import line each).
 4. Keep story copy, coordinates, tuning, voice banks, and asset manifests out of core.
 
 Do not introduce an entity-component system, plugin registry, generic rule DSL, global event bus, or
 unified state type for hypothetical future mechanics. Extract a new shared abstraction only after a
 second real implementation needs the same behavior.
+
+## Keep the file count low
+
+Agent cost scales with files read. Prefer fewer, larger files over many small ones:
+
+- Do not create a new file for code with a single consumer or under ~100 lines; fold it into its
+  consumer.
+- Do not create a folder for a single file.
+- Do not split a module until it exceeds ~600 lines or gains a second consumer.
+- Asset URLs always go through `asset()` in `src/assets.ts`; never hard-code `/assets/...`.
+
+## Assets and deployment
+
+- `public/assets/` is the local asset source, served by Vite in dev.
+- `VITE_ASSET_BASE_URL` (see `.env.example`) switches every asset to a CDN such as Cloudflare R2
+  at build time. When unset, assets resolve relative to the deployed `index.html`.
+- `vite.config.ts` uses `base: "./"` so `dist/` works from any host or subpath, including an R2
+  bucket. Upload `public/assets` to the CDN, build with the CDN base URL, and upload `dist/`.
+- `preloadGameAssets()` in `src/assets.ts` warms the browser cache in the background after first
+  paint; every asset also loads on demand, so preload failures are never fatal.
 
 ## Definition of a first playable version
 
@@ -38,5 +59,5 @@ second real implementation needs the same behavior.
 - Keyboard and touch controls both operate the primary loop.
 - Portrait and landscape preserve the map ratio and keep the player visible.
 - The game has a reachable success state and a recoverable failure state.
-- All referenced assets are local.
+- All referenced assets resolve locally or from the configured CDN.
 - `npm run typecheck` and `npm run build` pass.

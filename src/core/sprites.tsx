@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import type { Direction } from "../types";
+import type { Direction } from "./input";
 
 export interface SpriteSheetDefinition {
   src: string;

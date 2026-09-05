@@ -1,10 +1,10 @@
-import type { SpriteSheetDefinition } from "../core/sprites/ActorSprite";
-import type { GameDefinition } from "../mechanics/stealth/schema";
-import { MARLINSPIKE_AUDIO } from "./marlinspikeAudio";
-import { MARLINSPIKE_VOICE_BANKS } from "./marlinspikeVoices";
+import { asset } from "../assets";
+import type { AudioManifest } from "../core/audio";
+import type { SpriteSheetDefinition } from "../core/sprites";
+import type { GameDefinition } from "../mechanics/stealth/model";
 
 const playerSheet = (state: "idle" | "walk" | "interact", frames: number): SpriteSheetDefinition => ({
-  src: `/assets/sprites/player/${state}.png`,
+  src: asset(`assets/sprites/player/${state}.png`),
   frameWidth: 450,
   frameHeight: 556,
   frames,
@@ -15,7 +15,7 @@ const playerSheet = (state: "idle" | "walk" | "interact", frames: number): Sprit
 });
 
 const watchmanSheet = (state: "idle" | "patrol" | "alert", frames: number): SpriteSheetDefinition => ({
-  src: `/assets/sprites/watchman/${state}.png`,
+  src: asset(`assets/sprites/watchman/${state}.png`),
   frameWidth: 381,
   frameHeight: 557,
   frames,
@@ -26,7 +26,7 @@ const watchmanSheet = (state: "idle" | "patrol" | "alert", frames: number): Spri
 });
 
 const chiefSheet = (state: "idle" | "patrol" | "alert", frames: number): SpriteSheetDefinition => ({
-  src: `/assets/sprites/chief/${state}.png`,
+  src: asset(`assets/sprites/chief/${state}.png`),
   frameWidth: 474,
   frameHeight: 561,
   frames,
@@ -35,6 +35,108 @@ const chiefSheet = (state: "idle" | "patrol" | "alert", frames: number): SpriteS
   anchorX: 0.3249,
   anchorY: 0.9643,
 });
+
+const sfx = (name: string, extension: "mp3" | "wav", volume: number) => ({
+  src: asset(`assets/audio/sfx/${name}.${extension}`),
+  volume,
+});
+
+const MARLINSPIKE_AUDIO: AudioManifest = {
+  music: { src: asset("assets/audio/music.mp3"), volume: 0.18 },
+  ambience: { src: asset("assets/audio/ambience.wav"), volume: 0.08 },
+  secondaryLoop: { src: asset("assets/audio/radio.wav"), volume: 0.06 },
+  voices: {
+    root: asset("assets/audio/voices"),
+    extension: "wav",
+    volume: 0.78,
+    duckedMusicVolume: 0.08,
+  },
+  sfx: {
+    clue: sfx("clue", "wav", 0.38),
+    hide: sfx("hide", "mp3", 0.22),
+    suspicion: sfx("suspicion", "wav", 0.27),
+    clear: sfx("clear", "wav", 0.18),
+    detected: sfx("detected", "wav", 0.48),
+    caught: sfx("caught", "wav", 0.32),
+    lock: sfx("lock", "mp3", 0.36),
+    open: sfx("open", "wav", 0.48),
+    victory: sfx("victory", "mp3", 0.55),
+    door: sfx("door", "wav", 0.34),
+    turn: sfx("turn", "mp3", 0.16),
+    "step-1": sfx("step-1", "mp3", 0.08),
+    "step-2": sfx("step-2", "mp3", 0.08),
+    "step-3": sfx("step-3", "mp3", 0.08),
+    "step-4": sfx("step-4", "mp3", 0.08),
+    "guard-step-1": sfx("guard-step-1", "mp3", 0.11),
+    "guard-step-2": sfx("guard-step-2", "mp3", 0.11),
+    "guard-step-3": sfx("guard-step-3", "mp3", 0.11),
+    "guard-step-4": sfx("guard-step-4", "mp3", 0.11),
+  },
+};
+
+const MARLINSPIKE_VOICE_BANKS = {
+  clueCellar: [
+    { id: "tintin_clue_cellar_01", text: "A torn page. The first piece of the dossier." },
+  ],
+  clueKitchen: [
+    { id: "tintin_clue_kitchen_01", text: "Another piece—and hidden beside the pantry." },
+  ],
+  clueLibrary: [
+    { id: "tintin_clue_library_01", text: "That's all three. Now for the attic strongbox." },
+  ],
+  hide: [
+    { id: "tintin_hide_01", text: "Best wait until he turns." },
+    { id: "tintin_hide_02", text: "From here, I can watch his timing." },
+  ],
+  retry: [
+    { id: "tintin_retry_01", text: "The clues are safe. I'll try again." },
+    { id: "tintin_retry_02", text: "I know his pattern now." },
+  ],
+  boxLocked: [
+    { id: "tintin_box_locked_01", text: "The code is incomplete. I need all three pages." },
+  ],
+  victory: [
+    {
+      id: "tintin_victory_01",
+      text: "The ledger and landing chart—proof at last. This plot will be exposed before the ship comes in.",
+    },
+  ],
+  watchmanIdle: [
+    { id: "watchman_idle_01", text: "Chief wants the house quiet until dawn." },
+    { id: "watchman_idle_02", text: "Doors watched. Corridors clear." },
+  ],
+  watchmanSuspicion: [
+    { id: "watchman_suspicion_01", text: "Hold on… someone there?" },
+    { id: "watchman_suspicion_02", text: "What was that?" },
+  ],
+  watchmanSpotted: [
+    { id: "watchman_spotted_01", text: "You there—stand still!" },
+    { id: "watchman_spotted_02", text: "Stop! You're not allowed up here." },
+    { id: "watchman_spotted_03", text: "An intruder! Away from that door." },
+  ],
+  watchmanEscort: [
+    { id: "watchman_escort_01", text: "Back to the door with you." },
+    { id: "watchman_escort_02", text: "That's far enough. Back you go." },
+  ],
+  chiefIntro: [
+    { id: "chief_intro_01", text: "Signal before dawn. The ledger stays in the box." },
+  ],
+  chiefIdle: [
+    { id: "chief_idle_01", text: "No mistakes tonight." },
+    { id: "chief_idle_02", text: "Once the signal goes out, the coast is clear." },
+  ],
+  chiefSuspicion: [
+    { id: "chief_suspicion_01", text: "Who's there?" },
+    { id: "chief_suspicion_02", text: "I heard something by the console." },
+  ],
+  chiefSpotted: [
+    { id: "chief_spotted_01", text: "You! Away from that strongbox!" },
+    { id: "chief_spotted_02", text: "The reporter. Stop him!" },
+  ],
+  chiefEscort: [
+    { id: "chief_escort_01", text: "Back downstairs. You saw nothing." },
+  ],
+} as const;
 
 export const marlinspikeGame: GameDefinition = {
   id: "marlinspike-manor",
@@ -45,16 +147,16 @@ export const marlinspikeGame: GameDefinition = {
     maxStageWidth: 1000,
   },
   assets: {
-    titleArt: "/assets/title-art.png",
-    world: "/assets/manor.png",
-    portrait: "/assets/tintin-portrait.png",
-    clue: "/assets/props/clue-page.png",
+    titleArt: asset("assets/title-art.png"),
+    world: asset("assets/manor.png"),
+    portrait: asset("assets/tintin-portrait.png"),
+    clue: asset("assets/props/clue-page.png"),
     finalObjective: {
-      locked: "/assets/props/strongbox.png",
+      locked: asset("assets/props/strongbox.png"),
       opening: [
-        "/assets/props/strongbox-open-1.png",
-        "/assets/props/strongbox-open-2.png",
-        "/assets/props/strongbox-open-3.png",
+        asset("assets/props/strongbox-open-1.png"),
+        asset("assets/props/strongbox-open-2.png"),
+        asset("assets/props/strongbox-open-3.png"),
       ],
     },
     characters: {
@@ -101,7 +203,7 @@ export const marlinspikeGame: GameDefinition = {
     victoryBody:
       "The torn pages match the syndicate ledger. With the landing chart secured, the smugglers’ midnight operation will make tomorrow’s front page.",
     victoryWorldLabel: "Manor cleared",
-    credits: "A local browser game · No account or connection required",
+    credits: "A browser stealth mystery · Best played with sound",
   },
   intro: {
     establishingMs: 900,

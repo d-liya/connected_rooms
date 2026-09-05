@@ -1,15 +1,13 @@
-import { ArrowRight, Eye, FileText, Footprints, RotateCcw, X } from "lucide-react";
+import { ArrowRight, Eye, FileText, Footprints, Heart, HelpCircle, MoonStar, Pause, RotateCcw, Volume2, VolumeX, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { CSSProperties } from "react";
-import { CinematicIntro } from "../../components/CinematicIntro";
-import { TitleScreen } from "../../components/TitleScreen";
-import { TouchControls } from "../../core/input/TouchControls";
-import { ACTIVE_GAME } from "../../game/activeGame";
-import { FLOORS } from "./config";
-import { StealthHud } from "./StealthHud";
-import { PlayerSprite } from "./StealthSprites";
-import { StealthStage } from "./StealthStage";
-import { useStealthEngine } from "./useStealthEngine";
+import { TouchControls } from "../../core/input";
+import { ACTIVE_GAME } from "../../game";
+import { CinematicIntro, TitleScreen } from "../../screens";
+import { FLOORS, FLOOR_ROMAN } from "./model";
+import type { GameState } from "./model";
+import { useStealthEngine } from "./engine";
+import { PlayerSprite, StealthStage } from "./stage";
 
 export function StealthExperience() {
   const game = useStealthEngine();
@@ -27,7 +25,11 @@ export function StealthExperience() {
   if (game.state.status === "title") {
     return (
       <div className={`game-root ${ACTIVE_GAME.presentation.themeClass}`} style={rootStyle}>
-        <TitleScreen onStart={game.startGame} />
+        <TitleScreen
+          onStart={game.startGame}
+          ready={game.assetsReady}
+          progress={game.assetProgress}
+        />
       </div>
     );
   }
@@ -175,6 +177,70 @@ export function StealthExperience() {
           </span>
         </div>
       </main>
+    </div>
+  );
+}
+
+interface HudProps {
+  state: GameState;
+  muted: boolean;
+  onMute: () => void;
+  onPause: () => void;
+  onHelp: () => void;
+}
+
+function StealthHud({ state, muted, onMute, onPause, onHelp }: HudProps) {
+  const clueCount = Object.values(state.clues).filter(Boolean).length;
+  const clueTotal = Object.keys(ACTIVE_GAME.world.clues).length;
+  return (
+    <div className="hud" aria-label="Case status">
+      <div className="hud__identity ink-panel">
+        <div className="hud__portrait">
+          <img src={ACTIVE_GAME.assets.portrait} alt="" />
+        </div>
+        <div className="hud__identity-copy">
+          <span className="hud__name">{ACTIVE_GAME.copy.playerName.toUpperCase()}</span>
+          <div className="hearts" aria-label={`${state.hearts} of ${ACTIVE_GAME.mechanics.maxHearts} hearts remaining`}>
+            {Array.from({ length: ACTIVE_GAME.mechanics.maxHearts }, (_, index) => index + 1).map((heart) => (
+              <Heart
+                aria-hidden="true"
+                className={heart <= state.hearts ? "heart heart--full" : "heart heart--empty"}
+                fill="currentColor"
+                key={heart}
+                size={18}
+                strokeWidth={2.4}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="hud__objective ink-panel">
+        <div className="hud__objective-row">
+          <MoonStar aria-hidden="true" size={17} />
+          <span>{ACTIVE_GAME.copy.clockLabel}</span>
+          <span className="hud__floor">Floor {FLOOR_ROMAN[state.floor]}</span>
+        </div>
+        <strong>{FLOORS[state.floor].objective}</strong>
+      </div>
+
+      <div className={`hud__clues ink-panel ${clueCount === clueTotal ? "hud__clues--complete" : ""}`}>
+        <FileText aria-hidden="true" size={19} />
+        <span>CLUES</span>
+        <strong>{clueCount}/{clueTotal}</strong>
+      </div>
+
+      <div className="hud__buttons">
+        <button className="icon-button" onClick={onMute} aria-label={muted ? "Turn sound on" : "Mute sound"}>
+          {muted ? <VolumeX aria-hidden="true" /> : <Volume2 aria-hidden="true" />}
+        </button>
+        <button className="icon-button" onClick={onHelp} aria-label="Show controls">
+          <HelpCircle aria-hidden="true" />
+        </button>
+        <button className="icon-button" onClick={onPause} aria-label="Pause game">
+          <Pause aria-hidden="true" />
+        </button>
+      </div>
     </div>
   );
 }

@@ -46,8 +46,9 @@ the spotlight and slowly pull back to the exact gameplay camera framing.
 
 ## Audio
 
-Use local music, ambience, location loop, footsteps, alerts, interactions, and contextual player and
-guard voices. Voice playback ducks the music and mute affects every channel.
+Serve music, ambience, location loop, footsteps, alerts, interactions, and contextual player and
+guard voices from the asset base (local `public/assets` in dev, CDN in production) and preload them
+in the background on load. Voice playback ducks the music and mute affects every channel.
 
 ## Completion
 
