@@ -183,7 +183,7 @@ export function TitleScreen({ onStart, ready, progress }: TitleScreenProps) {
   const percent = Math.round(Math.min(1, Math.max(0, progress)) * 100);
   return (
     <main className="title-screen">
-      <img className="title-screen__art" src={ACTIVE_GAME.assets.titleArt} alt="Marlinspike Manor at night" />
+      <img className="title-screen__art" src={ACTIVE_GAME.assets.titleArt} alt={ACTIVE_GAME.copy.title} />
       <div className="title-screen__veil" />
       <section className="case-file" aria-labelledby="case-file-heading">
         <div className="case-file__stamp">{ACTIVE_GAME.copy.caseLabel}</div>
@@ -205,7 +205,7 @@ export function TitleScreen({ onStart, ready, progress }: TitleScreenProps) {
           {ready ? (
             <>{ACTIVE_GAME.copy.startLabel} <ArrowRight aria-hidden="true" /></>
           ) : (
-            <>Loading the manor… {percent}%</>
+            <>Loading game… {percent}%</>
           )}
         </button>
         {!ready && (

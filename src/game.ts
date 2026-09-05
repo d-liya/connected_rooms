@@ -2,7 +2,33 @@
 // ACTIVE_GAME at a different story package. (The gameplay runtime is selected
 // by the ActiveExperience import in main.tsx.)
 import { AudioController } from "./core/audio";
-import { marlinspikeGame as ACTIVE_GAME } from "./games/marlinspike";
+import { marlinspikeGame } from "./games/marlinspike";
+import { asset } from "./assets";
+import generatedMetadata from "./generated/metadata.json";
+
+// Prepared by the asset pipeline. Empty metadata keeps the example playable.
+// This changes content only: camera, controls, intro timing and audio stay intact.
+interface GameMetadata {
+  chatId?: string;
+  thumbnailUrl?: string;
+  copy?: Partial<typeof marlinspikeGame.copy>;
+}
+const metadata: GameMetadata = generatedMetadata;
+export const GAME_ID =
+  ((import.meta.env.VITE_GAME_ID as string | undefined) ?? "").trim() ||
+  metadata.chatId?.trim() || marlinspikeGame.id;
+const thumbnailUrl =
+  ((import.meta.env.VITE_THUMBNAIL_URL as string | undefined) ?? "").trim() ||
+  metadata.thumbnailUrl?.trim();
+const ACTIVE_GAME: typeof marlinspikeGame = {
+  ...marlinspikeGame,
+  id: GAME_ID,
+  assets: {
+    ...marlinspikeGame.assets,
+    titleArt: thumbnailUrl ? asset(thumbnailUrl) : marlinspikeGame.assets.titleArt,
+  },
+  copy: { ...marlinspikeGame.copy, ...metadata.copy },
+};
 
 export { ACTIVE_GAME };
 
@@ -14,8 +40,6 @@ const GAME_API_CLIENT_URL =
   ((import.meta.env.VITE_GAME_API_CLIENT_URL as string | undefined) ?? "").trim() ||
   "https://assets.capybara.build/js/game-api-client.js";
 
-export const GAME_ID =
-  ((import.meta.env.VITE_GAME_ID as string | undefined) ?? "").trim() || ACTIVE_GAME.id;
 
 export function isGameAnalyticsEnabled(): boolean {
   const raw = ((import.meta.env.VITE_ANALYTICS_ENABLED as string | undefined) ?? "")

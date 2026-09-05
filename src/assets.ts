@@ -13,6 +13,7 @@ const configured = ((import.meta.env.VITE_ASSET_BASE_URL as string | undefined) 
 export const ASSET_BASE_URL = configured;
 
 export function asset(path: string): string {
+  if (/^https?:\/\//i.test(path)) return path;
   const clean = path.startsWith("/") ? path.slice(1) : path;
   return configured ? `${configured}/${clean}` : `./${clean}`;
 }

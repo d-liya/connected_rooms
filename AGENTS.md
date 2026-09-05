@@ -61,3 +61,16 @@ Agent cost scales with files read. Prefer fewer, larger files over many small on
 - The game has a reachable success state and a recoverable failure state.
 - All referenced assets resolve locally or from the configured CDN.
 - `npm run typecheck` and `npm run build` pass.
+
+## Tested behavior must survive template cleanup
+
+Do not replace the tested camera framing/zoom/follow calculations, sprite calibration,
+cinematic timing and handoff, audio controller, or touch-control layout as template cleanup.
+Move-left stays at the left edge, the action stays centered, and move-right stays at the right
+edge. Remove story-specific content by changing data and copy, not by rebuilding these systems.
+
+The pipeline writes src/generated/metadata.json with chatId, thumbnailUrl, and optional copy
+(overrides matching the active story copy fields). GAME_ID uses VITE_GAME_ID, then chatId,
+then the example ID. Title artwork uses VITE_THUMBNAIL_URL, then thumbnailUrl, then example art.
+An empty file intentionally preserves the working example. Real runs must populate metadata;
+do not derive a thumbnail URL from chatId. The server adapter is not wired yet.
