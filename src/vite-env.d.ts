@@ -3,6 +3,8 @@
 // Set by https://assets.capybara.build/js/game-api-client.js (loaded lazily
 // by startGameAnalytics in game.ts). Only the surface this game uses is typed.
 interface GameServerClientInstance {
+  getSession(): Promise<{ user?: unknown } | null>;
+  signInGuest(): Promise<unknown>;
   startPlaytimeTracking(gameId: string): unknown;
 }
 

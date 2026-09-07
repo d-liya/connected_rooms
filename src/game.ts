@@ -74,6 +74,8 @@ export function isGameAnalyticsEnabled(): boolean {
 }
 
 interface PlaytimeClient {
+  getSession(): Promise<{ user?: unknown } | null>;
+  signInGuest(): Promise<unknown>;
   startPlaytimeTracking(gameId: string): unknown;
 }
 
@@ -115,11 +117,14 @@ export function startGameAnalytics(): void {
   if (!gameId || analyticsStartedFor === gameId) return;
   analyticsStartedFor = gameId;
   loadGameApiClient()
-    .then((Client) => {
+    .then(async (Client) => {
       if (!sharedClient) {
         const baseUrl = ((import.meta.env.VITE_GAME_SERVER_URL as string | undefined) ?? "").trim();
         sharedClient = new Client(baseUrl ? { baseUrl } : undefined);
       }
+      // Play-session ingestion requires authentication, including for guests.
+      const session = await sharedClient.getSession().catch(() => null);
+      if (!session?.user) await sharedClient.signInGuest();
       sharedClient.startPlaytimeTracking(gameId);
     })
     .catch((error) => {
