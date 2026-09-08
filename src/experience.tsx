@@ -6,7 +6,8 @@ import { useAnimationFrame } from "./core/hooks";
 import { TouchControls, useHorizontalControls, type Direction } from "./core/input";
 import { MapViewport, clamp } from "./core/map";
 import { ActorSprite } from "./core/sprites";
-import { CinematicIntro, TitleScreen } from "./screens";
+import { TitleScreen } from "./screens";
+import { GameOpening } from "./opening";
 
 // Replace this neutral traversal loop with the requested gameplay. The shared
 // screens, camera, audio, sprite renderer and touch layout are not mechanic code.
@@ -80,7 +81,7 @@ export function GameExperience() {
   return <div className={`game-root ${ACTIVE_GAME.presentation.themeClass}`} style={rootStyle}>
     {status === "title" ? <TitleScreen ready={load.ready} progress={load.fraction}
       onStart={() => { if (load.ready) { audio.current?.start(); setStatus("intro"); } }} />
-    : status === "intro" ? <CinematicIntro muted={muted} onMute={toggleMuted}
+    : status === "intro" ? <GameOpening muted={muted} onMute={toggleMuted}
       onComplete={() => setStatus("playing")} playerSprite={player} startX={firstRoom.spawnX} />
     : <main className="game-shell">
       <header className="hud">
