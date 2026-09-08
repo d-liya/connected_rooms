@@ -1,3 +1,4 @@
+import { damageFeedback } from "./damage-feedback";
 import { decodeGameImage } from "../assets";
 import { useAnimationFrame } from "./hooks";
 import { useEffect, useState, useRef, type CSSProperties } from "react";
@@ -28,6 +29,7 @@ interface ActorSpriteProps {
   loop?: boolean;
   paused?: boolean;
   playbackKey?: string | number;
+  damageElapsedSeconds?: number;
 }
 
 export function ActorSprite({
@@ -38,7 +40,7 @@ export function ActorSprite({
   facing,
   className = "",
   hidden = false,
-  label, elapsedSeconds, durationSeconds, loop = true, paused = false, playbackKey,
+  label, elapsedSeconds, durationSeconds, loop = true, paused = false, playbackKey, damageElapsedSeconds,
 }: ActorSpriteProps) {
   const [readySheet, setReadySheet] = useState<SpriteSheetDefinition | null>(null);
   const [clock, setClock] = useState(0);
@@ -63,7 +65,10 @@ export function ActorSprite({
     (active.height * (active.frameWidth / active.frameHeight)) / aspectRatio;
   const left = x - frameWorldWidth * active.anchorX;
   const top = groundY - active.height * active.anchorY;
+  const hit = damageFeedback(damageElapsedSeconds);
   const style = {
+    "--sprite-hit-filter": hit?.filter,
+    "--sprite-hit-reduced-filter": hit?.reducedMotionFilter,
     left: `${left / 10}%`,
     top: `${top / 10}%`,
     width: `${frameWorldWidth / 10}%`,
@@ -82,7 +87,7 @@ export function ActorSprite({
       aria-label={label}
       className={`character-sprite ${active.frames > 1 ? "character-sprite--animated" : ""} ${
         facing === "left" ? "character-sprite--left" : ""
-      } ${hidden ? "character-sprite--hidden" : ""} ${className}`}
+      } ${hidden ? "character-sprite--hidden" : ""} ${hit ? "character-sprite--hit" : ""} ${className}`}
       role="img"
       style={style}
     />

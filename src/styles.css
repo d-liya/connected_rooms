@@ -1714,3 +1714,12 @@ kbd {
     transition-duration: 1ms !important;
   }
 }
+
+/* Damage feedback uses the gameplay clock and leaves frame selection, facing,
+   collision size and ground anchoring untouched. One pulse, no flashing loop. */
+.character-sprite--hit {
+  filter: var(--sprite-hit-filter);
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-sprite--hit { filter: var(--sprite-hit-reduced-filter); }
+}

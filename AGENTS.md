@@ -33,3 +33,8 @@ Author game-specific title/menu in src/title-screen.tsx and HUD CSS. Preserve ti
 
 ## Experience direction
 Use the creator's experience direction to develop actions, decisions and consequences across the game. Physical floor numbers are independent of visit order. Choose the opening, purposeful journey and player-caused payoff to serve this game. Treat the supplied design as a creative hypothesis and resolve supporting details with your judgment. Generated artwork supplies identity and geometry; game-local React, inline SVG, Canvas, CSS and shaders can provide interactive fixtures, diary panels, signals, lighting and transformations. Match the art direction and connect each visual to actual game state. Provide a lightweight fallback for elaborate effects.
+
+## Stable mobile composition and damage feedback
+Keep MapViewport dimensions stable when transient text or enemy status changes. Use bounded, persistent HUD/control slots for contextual text, including the empty state; keep their contents from changing stage height. Place boss status in safe reserved HUD space when the top floor has no headroom. Keep characters and attack cues visible; positions follow their container rather than guessed screen offsets.
+
+ActorSprite accepts damageElapsedSeconds. On actual health loss, record each actor's lastDamageAt and pass gameplayTime - lastDamageAt to show an immediate chromatic hit pulse independently of the current animation. Omit before any hit, freeze gameplay time on pause, and reset on restart. A block or miss uses different feedback. The shared pulse preserves scale, ground anchors and frame playback, with a reduced-motion treatment. Supporting effects may be themed in game-local CSS.
