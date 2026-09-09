@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ACTIVE_GAME, createGameAudio } from "./game";
 import { waitForGameImages } from "./assets";
 import { useAnimationFrame } from "./core/hooks";
-import { TouchControls, useHorizontalControls, type Direction } from "./core/input";
+import { TouchActions, useHorizontalControls, type Direction } from "./core/input";
 import { MapViewport, clamp } from "./core/map";
 import { ActorSprite } from "./core/sprites";
 import { TitleScreen } from "./screens";
@@ -83,22 +83,23 @@ export function GameExperience() {
       onStart={() => { if (load.ready) { audio.current?.start(); setStatus("intro"); } }} />
     : status === "intro" ? <GameOpening muted={muted} onMute={toggleMuted}
       onComplete={() => setStatus("playing")} playerSprite={player} startX={firstRoom.spawnX} />
-    : <main className="game-shell">
-      <header className="hud">
+    : <main className="game-shell gameplay-layout">
+      <header className="hud gameplay-hud">
         <div className="hud__identity"><div className="hud__identity-copy"><strong>{room.label}</strong></div></div>
-        <div className="hud__objective">{connection?.label ?? "Move with arrows or A/D. E / Space to interact."}</div>
+        <div className="hud__objective">{connection?.label ?? ""}</div>
         <div className="hud__buttons"><button className="icon-button" aria-label={muted ? "Unmute" : "Mute"} onClick={toggleMuted}>{muted ? <VolumeX /> : <Volume2 />}</button>
           <button className="icon-button" aria-label="Show controls" onClick={() => setStatus("paused")}><HelpCircle /></button>
           <button className="icon-button" aria-label="Pause" onClick={() => setStatus("paused")}><Pause /></button></div>
       </header>
       <MapViewport ariaLabel={room.label} aspectRatio={ACTIVE_GAME.presentation.aspectRatio}
+        transitionKey={roomId} onDirection={controls.setDirection} inputEnabled={status === "playing"}
         focusX={x} focusY={(room.band.top + room.band.bottom) / 2}
         onWorldPointerDown={point => { if (status === "playing" && point.y / 10 >= room.band.top && point.y / 10 <= room.band.bottom) target.current = point.x; }}>
         {() => <><img className="game-stage__background" src={ACTIVE_GAME.assets.world} alt="" draggable={false} />{player}</>}
       </MapViewport>
-      <TouchControls actionLabel={connection?.label ?? "Interact"} onDirection={controls.setDirection} onInteract={interact} />
+      <TouchActions actions={[{ id: "interact", label: connection?.label ?? "Interact", disabled: status !== "playing", onPress: interact }]} />
       {status === "paused" && <div className="modal-backdrop"><section className="modal-card" role="dialog" aria-modal="true" aria-label="Paused">
-        <h2>Paused</h2><p>Move with A/D, arrows, or touch. Use E / Space or the center button to interact.</p><button className="primary-button" onClick={() => setStatus("playing")}>Resume</button>
+        <h2>Paused</h2><p>Move with A/D or arrows. On touch screens, drag anywhere on the map, on any floor. Use E / Space or the action button to interact.</p><button className="primary-button" onClick={() => setStatus("playing")}>Resume</button>
         <button className="text-button" onClick={reset}>Restart</button>
         <button className="text-button" onClick={() => { audio.current?.stop(); setRoomId(firstRoom.id); setX(firstRoom.spawnX); setStatus("title"); }}>Return to title</button>
       </section></div>}

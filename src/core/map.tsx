@@ -1,4 +1,5 @@
-import type { PointerEvent, ReactNode } from "react";
+import { useEffect, useState, type PointerEvent, type ReactNode } from "react";
+import { useMapJoystick, type Direction } from "./input";
 import { useElementSize } from "./hooks";
 
 export const WORLD_SIZE = 1000;
@@ -41,7 +42,8 @@ export interface CameraFrame {
 // Cover-scale the 1000-unit world over the frame and center the focus point,
 // clamping at the world edges so out-of-bounds area is never shown. focusX is
 // 0..1000, focusY is 0..100 (percent of stage height, matching child layout).
-// Returns null when the frame should show the complete map instead.
+// Desktop contains the map, top-aligned. Small frames add vertical travel.
+// Returns null only before valid dimensions are available.
 export function cameraFrame(
   frameWidth: number,
   frameHeight: number,
@@ -49,8 +51,13 @@ export function cameraFrame(
   focusX: number,
   focusY: number,
 ): CameraFrame | null {
-  if (!shouldFollowCamera(frameWidth, frameHeight)) return null;
-  const scale = Math.max(frameWidth / WORLD_SIZE, (frameHeight * aspectRatio) / WORLD_SIZE);
+  if (frameWidth <= 0 || frameHeight <= 0 || aspectRatio <= 0) return null;
+  if (!shouldFollowCamera(frameWidth, frameHeight)) {
+    const width = Math.min(frameWidth, frameHeight * aspectRatio);
+    return { width, height: width / aspectRatio, offsetX: (frameWidth - width) / 2,
+      offsetY: 0, followX: false, followY: false };
+  }
+  const scale = Math.max(frameWidth / WORLD_SIZE, (frameHeight * 1.25 * aspectRatio) / WORLD_SIZE);
   const width = scale * WORLD_SIZE;
   const height = (scale * WORLD_SIZE) / aspectRatio;
   return {
@@ -79,6 +86,10 @@ interface MapViewportProps {
   focusY: number;
   overlay?: ReactNode;
   transitioning?: boolean;
+  /** Change on room arrivals; ordinary movement does not trigger a transition. */
+  transitionKey?: string | number;
+  onDirection?: (direction: Direction, active: boolean) => void;
+  inputEnabled?: boolean;
   onWorldPointerDown?: (point: { x: number; y: number }) => void;
 }
 
@@ -90,13 +101,24 @@ export function MapViewport({
   focusY,
   overlay,
   transitioning = false,
+  transitionKey,
+  onDirection,
+  inputEnabled = true,
   onWorldPointerDown,
 }: MapViewportProps) {
   const { ref: frameRef, size: frameSize } = useElementSize<HTMLDivElement>();
   const frame = cameraFrame(frameSize.width, frameSize.height, aspectRatio, focusX, focusY);
+  const joystick = useMapJoystick(onDirection, inputEnabled);
+  const [arriving, setArriving] = useState(false);
+  useEffect(() => {
+    if (transitionKey === undefined) return;
+    setArriving(true);
+    const timer = window.setTimeout(() => setArriving(false), 620);
+    return () => window.clearTimeout(timer);
+  }, [transitionKey]);
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    if (!onWorldPointerDown || (event.target as HTMLElement).closest("button")) return;
+    if (!inputEnabled || event.defaultPrevented || !onWorldPointerDown || (event.target as Element).closest("button, a, input, [data-no-joystick]")) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     onWorldPointerDown({
       x: ((event.clientX - bounds.left) / bounds.width) * WORLD_SIZE,
@@ -105,11 +127,11 @@ export function MapViewport({
   };
 
   return (
-    <div className={`stage-frame${frame ? " stage-frame--follow" : ""}`} ref={frameRef}>
+    <div className={`stage-frame${frame ? " stage-frame--follow" : ""}`} ref={frameRef} {...joystick.handlers}>
       <div
         aria-label={ariaLabel}
         className={`game-stage${frame ? " game-stage--camera" : ""} ${
-          transitioning ? "game-stage--camera-transition" : ""
+          transitioning || arriving ? "game-stage--camera-transition" : ""
         }`}
         onPointerDown={handlePointerDown}
         style={
@@ -125,6 +147,7 @@ export function MapViewport({
         {children({ followX: frame?.followX ?? false })}
       </div>
       {overlay}
+      {joystick.indicator}
     </div>
   );
 }

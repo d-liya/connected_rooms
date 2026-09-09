@@ -1,5 +1,11 @@
 # General template contract
 
+## Gameplay viewport and touch input
+
+Use game-shell gameplay-layout, a gameplay-hud header, MapViewport, then TouchActions. The header has a bounded height (--gameplay-hud-height, default 80px landscape / 112px portrait); author enough room for the largest status including boss bars without resizing it during combat. Compact/reflow content at each breakpoint. Action space is 76px plus the device bottom inset on touch layouts. These rows reserve actual space outside the world, including the highest/lowest floors. Desktop contains the map at its native aspect ratio aligned to the top of the gameplay frame. Smaller frames cover at 1.25 times frame height to allow vertical following, clamped inside the world.
+
+MapViewport accepts transitionKey for a 620ms room-arrival transition, onDirection for map-wide joystick input, and inputEnabled for pause/intro/win gating. The joystick listens on the frame, not a particular room or a blocking overlay. Buttons, form controls and data-no-joystick regions are excluded. TouchActions accepts an array of id/label/icon/disabled/onPress/onRelease; onRelease marks a held action. Keep labels short and the set compact. Story rules, hit-stop duration, attack trails and impact art remain game-local; ActorSprite.damageElapsedSeconds supplies the shared actor damage pulse.
+
 ## Preserved implementation
 
 All src/core modules and styles.css are retained byte-for-byte from the tested game.

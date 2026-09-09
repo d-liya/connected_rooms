@@ -1522,6 +1522,7 @@ kbd {
 }
 
 .stage-frame {
+  touch-action: none;
   position: relative;
   container-type: inline-size;
   width: min(100vw, var(--game-max-width), calc(100svh * var(--game-aspect)));
@@ -1552,6 +1553,49 @@ kbd {
    glide via the longer transition below. */
 .game-stage--camera-transition {
   transition: transform 620ms cubic-bezier(0.65, 0, 0.25, 1);
+}
+
+/* Opt-in gameplay composition: HUD and actions never cover the world edges.
+   Set --gameplay-hud-height for the largest HUD state, including boss status. */
+.game-shell.gameplay-layout {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+}
+.gameplay-layout > .gameplay-hud {
+  position: relative; inset: auto; transform: none; flex: 0 0 auto;
+  width: min(100%, var(--game-max-width));
+  height: var(--gameplay-hud-height, 80px); box-sizing: border-box;
+  padding: max(8px, env(safe-area-inset-top)) 10px 8px;
+}
+.gameplay-layout > .stage-frame {
+  flex: 1 1 0; min-height: 0; height: auto; max-height: none;
+  width: min(100%, var(--game-max-width)); aspect-ratio: auto; border: 0;
+}
+.map-joystick {
+  position: absolute; z-index: 40; width: 88px; height: 88px; margin: -44px;
+  border: 2px solid #fff9; border-radius: 50%; background: #15253877; pointer-events: none;
+}
+.map-joystick i { position: absolute; left: 24px; top: 24px; width: 36px; height: 36px; border-radius: 50%; background: #fffbd9; }
+.touch-actions { display: none; }
+@media (hover: none), (pointer: coarse), (max-width: 760px) {
+  .touch-actions {
+    display: flex; flex: 0 0 auto; justify-content: flex-end; align-items: center; gap: 8px;
+    box-sizing: border-box; width: min(100%, var(--game-max-width));
+    height: calc(76px + env(safe-area-inset-bottom));
+    padding: 6px max(10px, env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  }
+  .touch-actions button {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    width: 56px; height: 56px; flex: 0 0 56px; padding: 4px; border-radius: 50%;
+    color: var(--touch-color, #fff); background: var(--touch-background, #18334b);
+    border: 2px solid var(--touch-border, #fff); font-size: 10px; touch-action: none;
+  }
+  .touch-actions button:disabled { opacity: .5; }
+}
+@media (orientation: portrait) {
+  .gameplay-layout > .gameplay-hud { height: var(--gameplay-hud-height, 112px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-stage--camera-transition { transition: none; }
 }
 
 .character-sprite {
