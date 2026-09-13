@@ -1,13 +1,11 @@
-# Griffin Street Brawl playtest
+# Arena starter
 
-Single-screen Peter versus AI Stewie. Best of three 60-second rounds. A/D or arrows move; J light, K heavy, L special, hold Space to block. Touch: stage drag plus four actions. Escape pauses; restart is available while playing or paused. All generated clips are retained, with action clocks driving playback. Shared core and styles.css are unchanged. The stage retains MapViewport input but uses arena-local CSS to contain the complete stage in portrait and landscape, keeping both fighters visible. Shared camera code is unchanged.
+One fixed full-stage arena, exactly two fighters, lateral movement, held block, light/heavy/special attacks, best-of rounds, AI opponent, timeout, pause and replay. The included vector training figures are neutral fixtures, not generated game content.
 
-## Known asset defects
-Stewie mixed/front-facing clips and duplicated heavy-attack body are deliberately included for this user-requested prototype. Walk repeats at runtime despite the source clip not being loop-ready. No production validation rules have been weakened. These are provisional gameplay timings and collision distances, not a finished arena template.
+## Data contract
+src/generated/game.json holds the prepared asset catalog and presentation. src/generated/arena.json holds fighter IDs, names, spawns, health, speeds, bounds, shared ground, rounds, reaction window and default moves. Code generation supplies the canonical design, per-fighter move rules and audio events through GAME_SPEC.md and prepared JSON; author experience.tsx and game-local modules to implement them. Do not reuse fixture names, move tuning or content blindly.
 
-## Run
-npm run dev -- --host 127.0.0.1 --port 55447
-npm run typecheck
-npm run build
+Reuse ActorSprite, image decode gate, shared audio, TouchActions and MapViewport inputs. Keep full arena visible; left/right movement buttons sit at opposite corners. No connected-room traversal. Preserve keyboard/touch, hold release/cancel, pause, retry and replay. Import arena.css after shared styles. No new dependencies.
 
-Local analytics are disabled in .env.local. Existing CDN media is used without generation calls.
+npm run dev / npm run typecheck / npm run build
+bun test tests/arena-combat.test.ts

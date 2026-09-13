@@ -1,0 +1,48 @@
+{
+  "playerId": "player",
+  "opponentId": "opponent",
+  "names": {
+    "player": "PLAYER",
+    "opponent": "OPPONENT"
+  },
+  "groundY": 900,
+  "bounds": {
+    "left": 110,
+    "right": 890
+  },
+  "spawns": [
+    270,
+    730
+  ],
+  "health": [
+    100,
+    100
+  ],
+  "speeds": [
+    190,
+    135
+  ],
+  "bestOf": 3,
+  "timerSeconds": 60,
+  "reactionSeconds": 1.5,
+  "moves": {
+    "light": {
+      "duration": 0.65,
+      "impact": 0.23,
+      "range": 165,
+      "damage": 9
+    },
+    "heavy": {
+      "duration": 1.05,
+      "impact": 0.48,
+      "range": 185,
+      "damage": 17
+    },
+    "special": {
+      "duration": 1.6,
+      "impact": 0.68,
+      "range": 235,
+      "damage": 24
+    }
+  }
+}
