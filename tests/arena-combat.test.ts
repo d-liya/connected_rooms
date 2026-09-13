@@ -1,0 +1,5 @@
+import {test,expect} from 'bun:test';
+import {fighter,act,advance,impact} from '../src/arena-combat';
+test('hit waits for impact, deals damage once, and interrupts with hurt',()=>{const a=fighter(300),b=fighter(440);act(a,'light',0);advance(a,.2);expect(impact(a,b,.2)).toBeNull();advance(a,.04);expect(impact(a,b,.24)).toBe('hit_light');expect(b.hp).toBe(91);expect(b.action).toBe('hurt');expect(impact(a,b,.25)).toBeNull();});
+test('block and whiff never remove health',()=>{const a=fighter(300),b=fighter(440);act(b,'block',0);act(a,'heavy',0);advance(a,.5);expect(impact(a,b,.5)).toBe('block');expect(b.hp).toBe(100);advance(a,1);b.x=800;act(a,'light',2);advance(a,.3);expect(impact(a,b,2.3)).toBe('whiff');expect(b.hp).toBe(100);});
+test('special cooldown and defeat precedence',()=>{const a=fighter(300),b=fighter(440);expect(act(a,'special',0)).toBe(true);advance(a,.7);b.hp=20;impact(a,b,.7);expect(b.action).toBe('defeated');expect(b.hp).toBe(0);expect(act(b,'light',1)).toBe(false);advance(a,2);expect(act(a,'special',3)).toBe(false);expect(act(a,'special',5)).toBe(true);});

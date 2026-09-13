@@ -1,38 +1,283 @@
 {
-  "id": "",
+  "id": "arena-peter-stewie-playtest",
   "presentation": {
-    "themeClass": "",
+    "themeClass": "arena",
     "aspectRatio": 1.7777777777777777,
-    "maxStageWidth": 1000
+    "maxStageWidth": 1280
   },
   "assets": {
-    "titleArt": "assets/world.svg",
-    "world": "assets/world.svg",
+    "titleArt": "https://assets.capybara.build/arena-v1/trials/96296e57-b597-49d3-bd79-462791313298/runs/853419cc74a6c1d5dc410349c4f7f737cc738b218243975577a2eee5ec537dad/game-thumbnail.png",
+    "world": "https://assets.capybara.build/arena-v1/trials/96296e57-b597-49d3-bd79-462791313298/runs/853419cc74a6c1d5dc410349c4f7f737cc738b218243975577a2eee5ec537dad/clean-stage.png",
     "images": {},
     "characters": {
-      "player": {
+      "peter_griffin": {
         "idle": {
-          "src": "assets/player.svg",
-          "frameWidth": 60,
-          "frameHeight": 100,
-          "frames": 1,
-          "fps": 1,
-          "height": 130,
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/idle.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 13,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "walk": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/walk.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 33,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "light": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/light.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 25,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "heavy": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/heavy.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 25,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "block": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/block.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 25,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "hurt": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/hurt.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 21,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "defeated": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/defeated.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 29,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "special": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/special.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 65,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        },
+        "celebrate": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/peter_griffin/celebrate.png",
+          "frameWidth": 449,
+          "frameHeight": 412,
+          "frames": 41,
+          "fps": 24,
+          "height": 590,
+          "anchorX": 0.46547884187082406,
+          "anchorY": 0.9466019417475728
+        }
+      },
+      "stewie_griffin": {
+        "idle": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/idle.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 13,
+          "fps": 24,
+          "height": 355,
           "anchorX": 0.5,
-          "anchorY": 1
+          "anchorY": 0.9041666666666667
+        },
+        "walk": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/walk.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 77,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "light": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/light.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 41,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "heavy": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/heavy.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 41,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "block": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/block.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 13,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "hurt": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/hurt.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 33,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "special": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/special.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 49,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "celebrate": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/celebrate.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 25,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
+        },
+        "defeated": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/fighter-retries/minimax-h3/8bad9ddef147f464140e7df0c024703a52c5b0f00e3ddd2be77337f793d3a48d/character-packs/stewie_griffin/defeated.png",
+          "frameWidth": 480,
+          "frameHeight": 480,
+          "frames": 29,
+          "fps": 24,
+          "height": 355,
+          "anchorX": 0.5,
+          "anchorY": 0.9041666666666667
         }
       }
     },
     "audio": {
       "music": {
-        "src": "assets/silence.wav",
-        "volume": 0
+        "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/background-music.mp3",
+        "volume": 0.28
       },
       "ambience": {
-        "src": "assets/silence.wav",
-        "volume": 0
+        "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/crowd_bed/sfx/media_c3113831-b72a-466f-9ac6-f9fe5bc03f62.mp3",
+        "volume": 0.6
       },
-      "sfx": {},
+      "sfx": {
+        "hit_light": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/hit_light/sfx/media_89cfebf4-26c4-4f60-b8c7-698101152aef.mp3",
+          "volume": 0.85
+        },
+        "hit_heavy": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/hit_heavy/sfx/media_cce2e8ac-f5b1-4cb8-b349-72d7394f3ab2.mp3",
+          "volume": 0.85
+        },
+        "hit_special": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/hit_special/sfx/media_0f8d26df-9a0e-40f0-a08e-8bd361fe94ea.mp3",
+          "volume": 0.85
+        },
+        "block": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/block/sfx/media_775ecdb9-aec5-4205-8cfa-5eeadf7b2d0c.mp3",
+          "volume": 0.65
+        },
+        "whiff": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/whiff/sfx/media_a5adae6a-043e-4fef-9768-095ff84a2e61.mp3",
+          "volume": 0.8
+        },
+        "round_bell": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/round_bell/sfx/media_bf9500e7-39f9-4ca5-9904-2c1adaf87375.mp3",
+          "volume": 0.9
+        },
+        "countdown_tick": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/countdown_tick/sfx/media_d727194e-adf4-4890-8d0e-377b06bea25a.mp3",
+          "volume": 0.75
+        },
+        "crowd_bed": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/crowd_bed/sfx/media_c3113831-b72a-466f-9ac6-f9fe5bc03f62.mp3",
+          "volume": 0.6
+        },
+        "ui_confirm": {
+          "src": "https://assets.capybara.build/platformer-v4/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/ui_confirm/sfx/media_624ae8c0-6d60-4d0b-a720-b9f1eac34993.mp3",
+          "volume": 0.8
+        },
+        "announce_round_1": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-d17d976d-9e4a-4cb9-862a-47e6643bc7c7.wav",
+          "volume": 0.85
+        },
+        "announce_round_2": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-d1ce42ea-e328-4f46-8a04-9caf3ae82c33.wav",
+          "volume": 0.85
+        },
+        "announce_round_3": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-1448932b-3ec0-4ffb-ae63-83f5e31659aa.wav",
+          "volume": 0.85
+        },
+        "announce_ko": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-a3e057fb-bc23-4846-813f-5164e150233a.wav",
+          "volume": 0.85
+        },
+        "announce_time": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-98b5c84c-5297-4fbf-a0bc-c04a13eb136a.wav",
+          "volume": 0.85
+        },
+        "announce_winner_peter_griffin": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-49fe94f6-4165-4dd0-8f28-a4a978393d32.wav",
+          "volume": 0.85
+        },
+        "fighter_intro_peter_griffin": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-e5ff56f0-df4b-44a4-916a-fdd7d3cca3a4.wav",
+          "volume": 0.85
+        },
+        "announce_winner_stewie_griffin": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-1a6c4207-fa21-4e00-8c16-8d0cc0838e2a.wav",
+          "volume": 0.85
+        },
+        "fighter_intro_stewie_griffin": {
+          "src": "https://assets.capybara.build/arena/trials/96296e57-b597-49d3-bd79-462791313298/runs/2049370db74a5fd7aaed5cf9daf08e7debfb612f271dc4c30430db1b060c06b0/a6eed7f898cf29fa20359680d4e3168b4acfbd2d630c2b29824a572bcce41ace/voice-v2-fenrir-3a8d56d7-2bbc-4722-bb3f-ec25e21a7c99.wav",
+          "volume": 0.85
+        }
+      },
       "voices": {
         "root": "assets/voices",
         "extension": "wav",
@@ -45,101 +290,43 @@
     "caseLabel": "CONNECTED ROOMS",
     "locationName": "Your world",
     "titleEyebrow": "READY FOR YOUR STORY",
-    "title": "Connected Rooms",
-    "titleSummary": "A reusable foundation. Supply your world, characters, and gameplay.",
+    "title": "Griffin Street Brawl",
+    "titleSummary": "Peter versus Stewie. A playable arena asset trial.",
     "titleRules": [
       "Move through the world",
       "Explore connected rooms",
       "Build your own interactions"
     ],
-    "startLabel": "Start",
+    "startLabel": "Fight",
     "credits": "CONNECTED ROOMS TEMPLATE"
   },
   "intro": {
     "establishingMs": 800,
     "skipLabel": "Skip intro",
-    "beats": [
-      {
-        "id": "overview",
-        "kicker": "YOUR WORLD",
-        "title": "A connected world",
-        "description": "The generated shot list introduces your game.",
-        "focus": {
-          "x": 50,
-          "y": 50,
-          "zoom": 1
-        },
-        "durationMs": 1800
-      },
-      {
-        "id": "entry",
-        "kicker": "BEGIN",
-        "title": "Your starting point",
-        "description": "Move with A/D or arrows. Use E or Space at a doorway.",
-        "focus": {
-          "x": 18,
-          "y": 80,
-          "zoom": 1
-        },
-        "showPlayer": true,
-        "settleToGameplay": true,
-        "durationMs": 1400
-      }
-    ]
+    "beats": []
   },
   "world": {
-    "startRoom": "lower",
+    "startRoom": "street",
     "rooms": [
       {
-        "id": "lower",
-        "label": "Lower room",
-        "groundY": 890,
+        "id": "street",
+        "label": "Griffin Street",
+        "groundY": 900,
         "band": {
-          "top": 50,
-          "bottom": 90
+          "top": 0,
+          "bottom": 100
         },
         "bounds": {
-          "left": 80,
-          "right": 920
+          "left": 110,
+          "right": 890
         },
-        "spawnX": 180
-      },
-      {
-        "id": "upper",
-        "label": "Upper room",
-        "groundY": 445,
-        "band": {
-          "top": 5,
-          "bottom": 45
-        },
-        "bounds": {
-          "left": 80,
-          "right": 920
-        },
-        "spawnX": 850
+        "spawnX": 260
       }
     ],
-    "connections": [
-      {
-        "id": "up",
-        "from": "lower",
-        "to": "upper",
-        "x": 850,
-        "targetX": 850,
-        "label": "Go upstairs"
-      },
-      {
-        "id": "down",
-        "from": "upper",
-        "to": "lower",
-        "x": 850,
-        "targetX": 850,
-        "label": "Go downstairs"
-      }
-    ]
+    "connections": []
   },
   "player": {
-    "assetId": "player",
-    "speed": 220
+    "assetId": "peter_griffin",
+    "speed": 190
   }
 }

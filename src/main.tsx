@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { ACTIVE_GAME, startGameAnalytics } from "./game";
 import { GameExperience as ActiveExperience } from "./experience";
 import "./styles.css";
+import "./arena.css";
 
 function App() {
   useEffect(() => {
