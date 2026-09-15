@@ -1,5 +1,6 @@
 /** Capybara game services. Import { sdk } from './sdk'.
- * Lazy CDN loading; window.gameId is injected by the host. Local play needs no SDK.
+ * Lazy CDN loading via the shared loadGameApiClient below; window.gameId is
+ * injected by the host. Local play needs no SDK.
  * Multiplayer is versioned room state: HTTP reads/writes plus live socket push
  * and ephemeral messages when the loaded client supports realtime.
  */
@@ -79,32 +80,67 @@ type Host = {
   gameId?: string;
   GameServerClient?: new (options?: Options) => Client;
 };
+export const DEFAULT_GAME_API_CLIENT_URL =
+  "https://assets.capybara.build/js/game-api-client.6915fc035020.js";
+/** Pinned client URL; VITE_GAME_API_CLIENT_URL overrides it when set. */
+export function gameApiClientUrl(): string {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> })
+      .env;
+    const override = (env?.VITE_GAME_API_CLIENT_URL ?? "").trim();
+    if (override) return override;
+  } catch {}
+  return DEFAULT_GAME_API_CLIENT_URL;
+}
 let scriptLoad: Promise<void> | undefined;
-function loadClient(): Promise<void> {
-  if (!scriptLoad)
-    scriptLoad = new Promise<void>((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src =
-        "https://assets.capybara.build/js/game-api-client.6915fc035020.js";
-      script.async = true;
-      const timeout = setTimeout(() => {
-        script.remove();
-        scriptLoad = undefined;
-        reject(new Error("Game services timed out. Retry."));
-      }, 15000);
-      script.onload = () => {
-        clearTimeout(timeout);
-        resolve();
-      };
-      script.onerror = () => {
-        clearTimeout(timeout);
-        script.remove();
-        scriptLoad = undefined;
-        reject(new Error("Game services unavailable. Retry."));
-      };
-      document.head.appendChild(script);
-    });
+/** Shared lazy loader for window.GameServerClient; used by the SDK and analytics.
+ * Injects the script tag at most once per page load; concurrent callers share
+ * the in-flight promise instead of double-injecting. Failures reset so a later
+ * call retries. Never called for offline-only play.
+ */
+export function loadGameApiClient(): Promise<void> {
+  if (
+    typeof window !== "undefined" &&
+    (window as unknown as Host).GameServerClient
+  )
+    return Promise.resolve();
+  if (scriptLoad) return scriptLoad;
+  const src = gameApiClientUrl();
+  if (typeof document === "undefined") {
+    return Promise.reject(new Error("Game services unavailable. Retry."));
+  }
+  const existing = document.querySelector(
+    'script[data-game-api-client="true"]',
+  ) as HTMLScriptElement | null;
+  // A tag is already in flight (HMR, duplicate bundle); wait for it instead of
+  // injecting a second one, even if its src differs from this build's.
+  if (existing) return (scriptLoad = waitForScript(existing));
+  const script = document.createElement("script");
+  script.src = src;
+  script.async = true;
+  script.dataset.gameApiClient = "true";
+  scriptLoad = waitForScript(script);
+  document.head.appendChild(script);
   return scriptLoad;
+}
+function waitForScript(script: HTMLScriptElement): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      script.remove();
+      scriptLoad = undefined;
+      reject(new Error("Game services timed out. Retry."));
+    }, 15000);
+    script.addEventListener("load", () => {
+      clearTimeout(timeout);
+      resolve();
+    });
+    script.addEventListener("error", () => {
+      clearTimeout(timeout);
+      script.remove();
+      scriptLoad = undefined;
+      reject(new Error("Game services unavailable. Retry."));
+    });
+  });
 }
 const status = (error: unknown) =>
   Number((error as { status?: number })?.status);
@@ -131,7 +167,7 @@ export function createGameSDK(providedHost?: Host) {
       throw new Error(
         "Hosted game ID is missing. Online features require a configured game.",
       );
-    if (!env.GameServerClient) await loadClient();
+    if (!env.GameServerClient) await loadGameApiClient();
     if (!env.GameServerClient)
       throw new Error("Game service client did not load.");
     gameId = env.gameId;

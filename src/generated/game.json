@@ -214,18 +214,17 @@
     }
   },
   "copy": {
-    "caseLabel": "CONNECTED ROOMS",
-    "locationName": "Training arena",
-    "titleEyebrow": "READY FOR YOUR STORY",
+    "caseLabel": "SINGLE SCENE",
+    "locationName": "Starter stage",
+    "titleEyebrow": "READY FOR YOUR GAME",
     "title": "Arena Starter",
-    "titleSummary": "A single-stage versus game.",
+    "titleSummary": "A neutral single-scene starter.",
     "titleRules": [
-      "Move through the world",
-      "Explore connected rooms",
-      "Build your own interactions"
+      "Start from the title screen",
+      "Replace this shell with the authored game"
     ],
-    "startLabel": "Fight",
-    "credits": "CONNECTED ROOMS TEMPLATE"
+    "startLabel": "Start",
+    "credits": "ARENA STARTER"
   },
   "intro": {
     "establishingMs": 800,

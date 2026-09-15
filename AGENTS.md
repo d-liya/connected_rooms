@@ -1,13 +1,15 @@
-# Single-screen game template
+# Single-scene generation contract
 
-This template supports games on one fixed side-view screen. The sample mechanics are replaceable. Implement the authored GAME_SPEC.md and prepared arena.json using the supplied media and scene geometry.
+Implement GAME_SPEC.md using the canonical design and supplied reference images, game.json, arena.json, placements.json and audio-events.json. This is a fixed-scene foundation, not a fighting-game specification. Existing sample rules, controls and presentation are replaceable.
 
-The template owns src/sdk.ts, src/core, game.ts and the shared rendering, input and audio infrastructure. Game-specific implementation belongs in experience.tsx and local simulation/style modules. Generated asset data is authoritative. Keep keyboard/touch controls, pause and restart usable. Run npm run typecheck and npm run build.
+Read-only during game generation: src/core/**, src/sdk.ts, src/styles.css, src/assets.ts, src/main.tsx and src/game.ts, prepared media/metadata JSON and dependency configuration. Preserve the existing host gameId and SDK integration.
 
-## Game services
-Use the single read-only `src/sdk.ts` module: `import { sdk } from './sdk'`.
-It loads the hosted client lazily and uses host-injected `window.gameId`; offline play makes no service calls.
-When requested, implement multiplayer in the first pass: local controls for local multiplayer, or online room-code create/join, guest identity, ready/waiting state, synchronized turns/actions/results and leave/rematch/error handling.
-Online API: `sdk.auth.ensureGuestSession()`, `sdk.multiplayer.joinRoom(code, metadata)`, `getRoomPlayers()`, `getRoomState()`, `updateRoomState(fullState)`, `leaveRoom()`, and `subscribe(onState, onError)` which returns cleanup. Subscriptions must be cleaned up on unmount/leave. Do not silently replace requested humans with AI.
-Room updates replace state with optimistic versions. On HTTP 409 fetch latest state and recompute the intended action; never replay a stale replacement. On errors stop polling and offer retry; respect 429 backoff. No requests in animation/render loops. Membership presence does not detect disconnects reliably.
-This is HTTP shared state, suitable for paced or turn-based multiplayer, not rollback or authoritative realtime fighting. Preserve the creator's requested mode and expose limitations honestly. Define turn/ownership rules in gameplay. Cloud saves: `sdk.save`; per-user storage: `sdk.storage`; optional analytics: `sdk.enableAnalytics()`.
+Include src/experience.tsx and src/arena.css, plus src/generated/content.json when the game changes presentation copy, intro or player speed. An override must keep copy.title, an intro.beats array and a positive playerSpeed. Add game-local modules under src as needed. Use actual exports from the seeded source; do not assume helpers or fields that are not supplied.
+
+Use the prepared asset IDs, coordinate conventions, anchors, facing normalization and animation-event mappings. Preserve uninterrupted source-frame ordering while synchronizing game-local retiming and rule-permitted interruptions. Missing analysis does not remove authored mechanics or authorize fabricated metadata.
+
+Derive controls, physics, AI when requested, feedback, interface and outcome handling from this game. Keep the whole authored scene visible; no offscreen traversal or additional connected stages. Keep input, animation, pause, audio and reset behavior coherent.
+
+Use sdk services only as required by the requested mode or existing host integration. Online play must use real remote sessions and respect the actual SDK's versioning, cleanup and transport limitations.
+
+Return complete <file name="src/...">contents</file> blocks only. The pipeline runs npm run typecheck and npm run build after applying them; do not claim these ran during an output-only generation call.

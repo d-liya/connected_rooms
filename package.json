@@ -2,6 +2,9 @@
   "name": "connected-rooms-template",
   "private": true,
   "version": "1.0.0",
+  "arenaContract": {
+    "version": 1
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#07171a" />
+    <!-- Warms DNS/TLS for the lazily loaded game API client; the script itself
+         is injected on demand by the shared loader in src/sdk.ts so offline
+         play makes no requests. -->
+    <link rel="preconnect" href="https://assets.capybara.build" crossorigin />
     <meta
       name="description"
       content="A reusable connected-rooms game template."

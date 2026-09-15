@@ -32,7 +32,12 @@ export class AudioController {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private loops = new Map<"music" | "ambience" | "secondary", ActiveLoop>();
+  private eventLoops = new Map<string, { token: number; loop: ActiveLoop }>();
+  private eventLoopTokens = new Map<string, number>();
+  private eventLoopSeq = 0;
   private voice: { source: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private voicePriority = 0;
+  private voiceSeq = 0;
   private buffers = new Map<string, Promise<AudioBuffer | null>>();
   private lastPlayed = new Map<string, number>();
   private warned = new Set<string>();
@@ -144,14 +149,22 @@ export class AudioController {
     });
   }
 
-  playVoice(id: string): void {
+  playVoice(id: string, options?: { priority?: number; cooldownMs?: number }): void {
     if (this.muted) return;
+    const priority = options?.priority ?? 0;
+    if (this.voice && priority < this.voicePriority) return;
+    const now = performance.now();
+    const cooldownKey = `voice:${id}`;
+    if (now - (this.lastPlayed.get(cooldownKey) ?? -Infinity) < (options?.cooldownMs ?? 0)) return;
+    this.lastPlayed.set(cooldownKey, now);
     const ctx = this.context();
     if (!ctx || !this.master) return;
     this.stopVoice();
+    const seq = ++this.voiceSeq;
     const { root, extension, volume } = this.manifest.voices;
     this.setDucked(true);
     void this.loadBuffer(`voice:${id}`, `${root}/${id}.${extension}`).then((buffer) => {
+      if (seq !== this.voiceSeq) return;
       if (!buffer || !this.ctx || !this.master) {
         this.setDucked(false);
         return;
@@ -163,13 +176,88 @@ export class AudioController {
       source.buffer = buffer;
       source.connect(gain);
       this.voice = { source, gain };
+      this.voicePriority = priority;
       source.onended = () => {
         gain.disconnect();
-        if (this.voice?.source === source) this.voice = null;
+        if (this.voice?.source === source) {
+          this.voice = null;
+          this.voicePriority = 0;
+        }
         this.setDucked(false);
       };
       source.start();
     });
+  }
+
+  /**
+   * Event-owned short loop from the sfx dictionary (beam hum, rally bed).
+   * Games start it on the loop's start event and stop it on the stop event;
+   * unlike ambience it never persists beyond its owner. Returns a generation
+   * token: stale completions and stale stops never affect a newer start.
+   */
+  startEventLoop(id: string, sfxName: string): number {
+    const token = ++this.eventLoopSeq;
+    this.eventLoopTokens.set(id, token);
+    this.stopLiveEventLoop(id);
+    const clip = this.manifest.sfx[sfxName];
+    if (!clip) {
+      this.warnOnce(`event-loop:${id}`, sfxName, new Error(`Unknown event-loop clip: ${sfxName}`));
+      return token;
+    }
+    const ctx = this.context();
+    if (!ctx || !this.master || this.muted) return token;
+    void this.loadBuffer(`event:${id}:${token}`, clip.src).then((buffer) => {
+      if (!buffer || !this.ctx || !this.master) return;
+      if (this.eventLoopTokens.get(id) !== token) return;
+      const gain = this.ctx.createGain();
+      gain.gain.value = clip.volume;
+      gain.connect(this.master);
+      const source = this.ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+      source.connect(gain);
+      source.start();
+      this.eventLoops.set(id, { token, loop: { source, gain } });
+    });
+    return token;
+  }
+
+  /**
+   * Stop an event-owned loop. With a token, stops only when it still matches
+   * the latest start; without one, stops unconditionally.
+   */
+  stopEventLoop(id: string, token?: number): void {
+    if (token !== undefined && this.eventLoopTokens.get(id) !== token) return;
+    this.eventLoopTokens.delete(id);
+    this.stopLiveEventLoop(id);
+  }
+
+  stopAllEventLoops(): void {
+    this.eventLoopTokens.clear();
+    for (const id of [...this.eventLoops.keys()]) this.stopLiveEventLoop(id);
+  }
+
+  /**
+   * Restrained procedural UI cue on the shared context/mixer for activations
+   * with no suitable supplied sound. Never layered over an existing cue.
+   */
+  playUiClick(kind: "confirm" | "back" | "toggle" = "confirm"): void {
+    if (this.muted) return;
+    const ctx = this.context();
+    if (!ctx || !this.master) return;
+    void ctx.resume().catch(() => undefined);
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = kind === "back" ? 330 : kind === "toggle" ? 520 : 660;
+    const t = ctx.currentTime;
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.16, t + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+    osc.connect(gain);
+    gain.connect(this.master);
+    osc.start(t);
+    osc.stop(t + 0.1);
   }
 
   stop(): void {
@@ -177,6 +265,7 @@ export class AudioController {
     this.secondaryActive = false;
     this.setDucked(false);
     for (const kind of ["music", "ambience", "secondary"] as const) this.stopLoop(kind);
+    this.stopAllEventLoops();
     this.stopVoice();
   }
 
@@ -218,10 +307,25 @@ export class AudioController {
     loop.gain.disconnect();
   }
 
+  private stopLiveEventLoop(id: string): void {
+    const live = this.eventLoops.get(id);
+    if (!live) return;
+    this.eventLoops.delete(id);
+    try {
+      live.loop.source.stop();
+    } catch {
+      // Already stopped: fall through to disconnect.
+    }
+    live.loop.source.disconnect();
+    live.loop.gain.disconnect();
+  }
+
   private stopVoice(): void {
+    this.voiceSeq++;
     const voice = this.voice;
     if (!voice) return;
     this.voice = null;
+    this.voicePriority = 0;
     try {
       voice.source.stop();
     } catch {

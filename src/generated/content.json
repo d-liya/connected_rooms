@@ -1,0 +1,21 @@
+{
+  "copy": {
+    "caseLabel": "SINGLE SCENE",
+    "locationName": "Starter stage",
+    "titleEyebrow": "READY FOR YOUR GAME",
+    "title": "Arena Starter",
+    "titleSummary": "A neutral single-scene starter.",
+    "titleRules": [
+      "Start from the title screen",
+      "Replace this shell with the authored game"
+    ],
+    "startLabel": "Start",
+    "credits": "ARENA STARTER"
+  },
+  "intro": {
+    "establishingMs": 800,
+    "skipLabel": "Skip intro",
+    "beats": []
+  },
+  "playerSpeed": 190
+}
