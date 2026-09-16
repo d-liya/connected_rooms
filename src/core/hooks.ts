@@ -29,6 +29,34 @@ interface ElementSize {
   height: number;
 }
 
+/**
+ * Live stage aspect for fullscreen cover mode. Observes the single
+ * .stage-frame so sprite width math stays correct when the stage covers a
+ * non-authored viewport aspect (touch landscape). Returns null until
+ * measured; pass `measured ?? authoredAspect` to ActorSprite to keep
+ * contain behavior everywhere else.
+ */
+export function useStageAspect() {
+  const [aspect, setAspect] = useState<number | null>(null);
+
+  useEffect(() => {
+    const frame = document.querySelector(".stage-frame");
+    if (!frame) return;
+
+    const update = () => {
+      const bounds = frame.getBoundingClientRect();
+      setAspect(bounds.height > 0 ? bounds.width / bounds.height : null);
+    };
+
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, []);
+
+  return aspect;
+}
+
 export function useElementSize<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
   const [size, setSize] = useState<ElementSize>({ width: 0, height: 0 });

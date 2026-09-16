@@ -8,7 +8,7 @@ Include src/experience.tsx and src/arena.css, plus src/generated/content.json wh
 
 Use the prepared asset IDs, coordinate conventions, anchors, facing normalization and animation-event mappings. Preserve uninterrupted source-frame ordering while synchronizing game-local retiming and rule-permitted interruptions. Missing analysis does not remove authored mechanics or authorize fabricated metadata.
 
-Derive controls, physics, AI when requested, feedback, interface and outcome handling from this game. Keep the whole authored scene visible; no offscreen traversal or additional connected stages. Keep input, animation, pause, audio and reset behavior coherent.
+Derive controls, physics, AI when requested, feedback, interface and outcome handling from this game. Keep the whole authored scene visible; no offscreen traversal or additional connected stages. On touch landscape the template covers the viewport instead: do not pin aspect-fit sizing on .stage-frame--fixed, pass useStageAspect() to ActorSprite, and inset touch/HUD overlays with the stage --safe-* variables. Keep input, animation, pause, audio and reset behavior coherent.
 
 Use sdk services only as required by the requested mode or existing host integration. Online play must use real remote sessions and respect the actual SDK's versioning, cleanup and transport limitations.
 

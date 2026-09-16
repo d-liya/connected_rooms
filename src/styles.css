@@ -32,13 +32,25 @@ body,
   overflow: hidden;
 }
 
-/* Games have no selectable text: no tap flashes, callouts, or selection
-   anywhere. Keyboard focus rings (:focus-visible) are intentionally kept so
+/* Games have no selectable text: no iOS magnifier loupe, touch callout,
+   tap flashes, or selection anywhere. Explicit per-element rules beat
+   inheritance so no UA stylesheet or game CSS can re-enable selection on
+   buttons mid-game; text inputs keep normal selection for code entry.
+   Keyboard focus rings (:focus-visible) are intentionally kept so
    keyboard play stays navigable. */
-body {
+body,
+body * {
+  -webkit-touch-callout: none;
+}
+body,
+body *:not(input):not(textarea):not([contenteditable="true"]) {
   user-select: none;
   -webkit-user-select: none;
-  -webkit-touch-callout: none;
+}
+input,
+textarea {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 img {
@@ -186,6 +198,35 @@ button:focus-visible {
   border: var(--stage-border, clamp(2px, 0.28vw, 5px) solid #0c1110);
   background: var(--stage-background, #111);
   box-shadow: var(--stage-shadow, 0 22px 65px rgba(0, 0, 0, 0.58));
+  /* Safe-area contract for game-authored overlay layers (touch controls,
+     HUD, meters): inset with these so the notch, home indicator, and
+     rounded corners never crop fullscreen play. Zero where unsupported. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* Touch landscape goes fullscreen: the fixed scene covers the viewport and
+   the painted background crops from the top (object-position: bottom keeps
+   the painted ground near the gameplay ground line). Portrait keeps the
+   contained stage; desktop is unchanged. Sprite width math must use the
+   live stage aspect (useStageAspect) in this mode. */
+@media (hover: none) and (orientation: landscape), (pointer: coarse) and (orientation: landscape) {
+  .stage-frame--fixed {
+    width: 100vw;
+    width: 100dvw;
+    height: 100svh;
+    max-height: none;
+    aspect-ratio: auto;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  .stage-frame--fixed .game-stage__background {
+    object-fit: cover;
+    object-position: center bottom;
+  }
 }
 
 .game-stage {

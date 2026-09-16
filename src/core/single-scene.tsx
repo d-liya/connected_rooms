@@ -13,6 +13,9 @@ export interface SingleSceneProps {
  * Fixed single-scene viewport. The whole authored scene stays visible at the
  * authored aspect ratio: no camera-follow, no room transitions, no offscreen
  * traversal. Sizing comes from .stage-frame--fixed in the game stylesheet.
+ * Exception: on touch landscape the template covers the viewport instead
+ * (background crops from the top); see useStageAspect and the --safe-*
+ * stage variables for the game-side halves of that contract.
  */
 export function SingleScene({ ariaLabel, aspectRatio, children, overlay, className = "", style }: SingleSceneProps) {
   return (
